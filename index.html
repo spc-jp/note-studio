@@ -42,12 +42,7 @@
   .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
   .btn-danger { background: transparent; color: var(--accent3); border: 1px solid var(--accent3); padding: 6px 12px; font-size: 12px; }
   .btn-sm { padding: 7px 14px; font-size: 12px; }
-  .apikey-bar { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-  .apikey-bar label { margin: 0; white-space: nowrap; }
-  .apikey-bar input { flex: 1; min-width: 180px; }
-  .apikey-status { font-size: 12px; font-weight: 700; }
-  .apikey-status.ok { color: var(--accent); }
-  .apikey-status.ng { color: var(--accent3); }
+
   .title-list { list-style: none; }
   .title-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 8px; transition: border-color 0.2s; }
   .title-item:hover { border-color: var(--accent); }
@@ -107,11 +102,7 @@
 
 <div class="main">
 
-  <!-- 接続ステータスバー -->
-  <div class="apikey-bar">
-    <label>🔗 AI接続ステータス</label>
-    <span class="apikey-status ok" id="apiStatus">● Claude AI 接続中</span>
-  </div>
+
 
   <!-- タブ1：ネタ出し -->
   <div class="tab-panel active" id="tab-neta">
