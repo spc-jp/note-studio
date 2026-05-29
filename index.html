@@ -110,8 +110,7 @@
   <!-- 接続ステータスバー -->
   <div class="apikey-bar">
     <label>🔗 AI接続ステータス</label>
-    <span class="apikey-status ok" id="apiStatus">● note-studio.yymmatsu.workers.dev</span>
-    <button class="btn btn-secondary btn-sm" onclick="testApi()">接続テスト</button>
+    <span class="apikey-status ok" id="apiStatus">● Claude AI 接続中</span>
   </div>
 
   <!-- タブ1：ネタ出し -->
@@ -324,20 +323,6 @@ window.onload = () => {
   document.getElementById('schedDate').value = new Date().toISOString().split('T')[0];
   renderSched(); renderWeekSummary();
 };
-
-async function testApi() {
-  const btn = event.currentTarget;
-  btn.textContent = 'テスト中...';
-  btn.disabled = true;
-  try {
-    await callClaude('「接続OK」とだけ返してください。', 30);
-    alert('✅ Worker接続成功！Claude APIと正常につながっています。');
-  } catch(e) {
-    alert('❌ 接続失敗：' + e.message + '\n\nWorkerのデプロイとAPIキーの環境変数を確認してください。');
-  }
-  btn.textContent = '接続テスト';
-  btn.disabled = false;
-}
 
 async function callClaude(prompt, maxTokens = 1500) {
   const res = await fetch(WORKER_URL, {
