@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>note収益化スタジオ</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Zen+Kaku+Gothic+New:wght@400;700;900&display=swap');
+  :root {
+    --bg: #0f0f13; --surface: #1a1a24; --surface2: #22222f; --border: #2e2e40;
+    --accent: #41e296; --accent2: #7c6fff; --accent3: #ff6b6b; --accent4: #ffd166;
+    --text: #eaeaf2; --text2: #9090aa; --text3: #5a5a72;
+    --radius: 12px; --radius-sm: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans JP', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+  .header { padding: 20px 24px 0; display: flex; align-items: center; gap: 16px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .logo { font-family: 'Zen Kaku Gothic New', sans-serif; font-weight: 900; font-size: 20px; color: var(--accent); letter-spacing: -0.5px; white-space: nowrap; }
+  .logo span { color: var(--text2); font-weight: 400; font-size: 12px; margin-left: 8px; }
+  .tabs { display: flex; margin-left: auto; flex-wrap: wrap; }
+  .tab-btn { padding: 14px 18px; background: none; border: none; color: var(--text3); font-family: 'Noto Sans JP', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; white-space: nowrap; }
+  .tab-btn:hover { color: var(--text2); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .main { padding: 28px 24px; max-width: 900px; margin: 0 auto; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+  .section-title { font-family: 'Zen Kaku Gothic New', sans-serif; font-weight: 900; font-size: 20px; margin-bottom: 6px; }
+  .section-sub { color: var(--text2); font-size: 13px; margin-bottom: 24px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; }
+  .card-title { font-size: 12px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+  label { font-size: 13px; color: var(--text2); display: block; margin-bottom: 6px; font-weight: 500; }
+  select, input[type="text"], input[type="date"], textarea { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-family: 'Noto Sans JP', sans-serif; font-size: 14px; padding: 10px 14px; outline: none; transition: border-color 0.2s; appearance: none; }
+  select:focus, input:focus, textarea:focus { border-color: var(--accent); }
+  textarea { resize: vertical; line-height: 1.7; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .form-group { margin-bottom: 16px; }
+  .btn { padding: 11px 22px; border-radius: var(--radius-sm); border: none; font-family: 'Noto Sans JP', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+  .btn-primary { background: var(--accent); color: #0f0f13; }
+  .btn-primary:hover { background: #2fd180; transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-danger { background: transparent; color: var(--accent3); border: 1px solid var(--accent3); padding: 6px 12px; font-size: 12px; }
+  .btn-sm { padding: 7px 14px; font-size: 12px; }
+  .apikey-bar { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .apikey-bar label { margin: 0; white-space: nowrap; }
+  .apikey-bar input { flex: 1; min-width: 180px; }
+  .apikey-status { font-size: 12px; font-weight: 700; }
+  .apikey-status.ok { color: var(--accent); }
+  .apikey-status.ng { color: var(--accent3); }
+  .title-list { list-style: none; }
+  .title-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 8px; transition: border-color 0.2s; }
+  .title-item:hover { border-color: var(--accent); }
+  .title-text { flex: 1; font-size: 14px; line-height: 1.5; }
+  .title-use-btn { background: var(--surface); border: 1px solid var(--accent); color: var(--accent); border-radius: 6px; padding: 5px 12px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; }
+  .title-use-btn:hover { background: var(--accent); color: #0f0f13; }
+  .generated-box { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px; font-size: 14px; line-height: 1.8; white-space: pre-wrap; min-height: 120px; color: var(--text); }
+  .edit-area { width: 100%; min-height: 200px; background: var(--surface2); border: 1px solid var(--accent2); border-radius: var(--radius-sm); color: var(--text); font-family: 'Noto Sans JP', sans-serif; font-size: 14px; padding: 14px; line-height: 1.8; resize: vertical; outline: none; }
+  .check-result { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border-radius: var(--radius-sm); margin-bottom: 8px; font-size: 14px; }
+  .check-ok { background: rgba(65,226,150,0.08); border: 1px solid rgba(65,226,150,0.3); }
+  .check-warn { background: rgba(255,209,102,0.08); border: 1px solid rgba(255,209,102,0.3); }
+  .check-ng { background: rgba(255,107,107,0.08); border: 1px solid rgba(255,107,107,0.3); }
+  .check-icon { font-size: 18px; flex-shrink: 0; }
+  .check-label { font-weight: 700; margin-bottom: 2px; }
+  .check-detail { color: var(--text2); font-size: 13px; }
+  .schedule-table { width: 100%; border-collapse: collapse; }
+  .schedule-table th { text-align: left; padding: 10px 12px; font-size: 12px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border); }
+  .schedule-table td { padding: 12px 12px; font-size: 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .status-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+  .status-draft { background: rgba(144,144,170,0.15); color: var(--text2); }
+  .status-ready { background: rgba(124,111,255,0.15); color: var(--accent2); }
+  .status-posted { background: rgba(65,226,150,0.15); color: var(--accent); }
+  .loading { display: inline-flex; align-items: center; gap: 10px; color: var(--text2); font-size: 14px; }
+  .spinner { width: 18px; height: 18px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .ai-note { background: rgba(124,111,255,0.08); border: 1px solid rgba(124,111,255,0.3); border-radius: var(--radius-sm); padding: 10px 14px; font-size: 12px; color: var(--accent2); margin-bottom: 16px; }
+  .framework-btns { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+  .fw-btn { padding: 8px 18px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface2); color: var(--text2); font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+  .fw-btn.active { border-color: var(--accent2); color: var(--accent2); background: rgba(124,111,255,0.1); }
+  .fw-btn:hover { border-color: var(--text2); }
+  .framework-text { background: rgba(124,111,255,0.06); border-left: 3px solid var(--accent2); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; padding: 12px 16px; font-size: 13px; color: var(--text2); margin-bottom: 16px; line-height: 1.7; }
+  .score-bar-wrap { margin-bottom: 20px; }
+  .score-bar-label { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
+  .score-bar-track { height: 8px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
+  .score-bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s; }
+  .fill-green { background: var(--accent); }
+  .fill-yellow { background: var(--accent4); }
+  .fill-red { background: var(--accent3); }
+  .genre-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+  .genre-tag { padding: 7px 16px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface2); color: var(--text2); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+  .genre-tag.active { border-color: var(--accent); color: var(--accent); background: rgba(65,226,150,0.08); }
+  .divider { height: 1px; background: var(--border); margin: 24px 0; }
+  @media (max-width: 640px) { .form-row { grid-template-columns: 1fr; } .main { padding: 20px 16px; } .tab-btn { padding: 12px 12px; font-size: 12px; } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">📝 note収益化スタジオ<span>考えるを、ひとりにしない</span></div>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('neta',this)">💡 ネタ出し</button>
+    <button class="tab-btn" onclick="switchTab('writing',this)">✍️ 記事生成</button>
+    <button class="tab-btn" onclick="switchTab('checker',this)">🛡️ 投稿チェック</button>
+    <button class="tab-btn" onclick="switchTab('schedule',this)">📅 スケジュール</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- 接続ステータスバー -->
+  <div class="apikey-bar">
+    <label>🔗 AI接続ステータス</label>
+    <span class="apikey-status ok" id="apiStatus">● note-studio.yymmatsu.workers.dev</span>
+    <button class="btn btn-secondary btn-sm" onclick="testApi()">接続テスト</button>
+  </div>
+
+  <!-- タブ1：ネタ出し -->
+  <div class="tab-panel active" id="tab-neta">
+    <div class="section-title">💡 ネタ出しマシン</div>
+    <div class="section-sub">ジャンル × ターゲット × 切り口でタイトル案を10本生成します</div>
+    <div class="card">
+      <div class="card-title">ジャンルを選ぶ</div>
+      <div class="genre-tags">
+        <span class="genre-tag active" onclick="toggleGenre(this,'副業・お金のノウハウ')">💰 副業・お金</span>
+        <span class="genre-tag" onclick="toggleGenre(this,'SNS運用・フォロワー増加術')">📱 SNS運用</span>
+        <span class="genre-tag" onclick="toggleGenre(this,'AI活用・仕事効率化')">🤖 AI活用</span>
+        <span class="genre-tag" onclick="toggleGenre(this,'恋愛・人間関係')">❤️ 恋愛・人間関係</span>
+        <span class="genre-tag" onclick="toggleGenre(this,'ライフハック・生活改善')">🌟 ライフハック</span>
+        <span class="genre-tag" onclick="toggleGenre(this,'note運営・収益化ノウハウ')">📝 note運営</span>
+        <span class="genre-tag" onclick="toggleGenre(this,'Web制作・フリーランス')">💻 Web・フリーランス</span>
+        <span class="genre-tag" onclick="toggleGenre(this,'中小企業経営・マーケティング')">🏢 中小企業経営</span>
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="margin:0">
+          <label>ターゲット読者</label>
+          <input type="text" id="netatarget" placeholder="例：副業を始めたい30代会社員">
+        </div>
+        <div class="form-group" style="margin:0">
+          <label>切り口・テイスト</label>
+          <select id="netaangle">
+            <option>実体験・失敗談ベース</option>
+            <option>ノウハウ・ハウツー</option>
+            <option>比較・ランキング</option>
+            <option>初心者向け超入門</option>
+            <option>上級者向け深掘り</option>
+            <option>最新情報・トレンド</option>
+            <option>具体的な数字・実績あり</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>キーワード・補足（任意）</label>
+        <input type="text" id="netakeyword" placeholder="例：ChatGPT、月5万円、完全初心者">
+      </div>
+      <button class="btn btn-primary" onclick="generateNeta()" id="netaBtn">✨ タイトル案を10本生成する</button>
+    </div>
+    <div id="netaResult"></div>
+  </div>
+
+  <!-- タブ2：記事生成 -->
+  <div class="tab-panel" id="tab-writing">
+    <div class="section-title">✍️ 記事ライティング支援</div>
+    <div class="section-sub">構成フレームワークを選んでAIが本文を生成します</div>
+    <div class="ai-note">⚠️ note2026年規約：AI生成後は必ず人間による編集・事実確認が必要です。「自分編集エリア」で加筆・修正してから投稿してください。</div>
+    <div class="card">
+      <div class="card-title">記事の基本情報</div>
+      <div class="form-group">
+        <label>タイトル</label>
+        <input type="text" id="articleTitle" placeholder="例：ChatGPTで副業収入を月5万円にした実体験ノート">
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="margin:0">
+          <label>ターゲット読者</label>
+          <input type="text" id="articleTarget" placeholder="例：副業初心者の会社員">
+        </div>
+        <div class="form-group" style="margin:0">
+          <label>記事の長さ</label>
+          <select id="articleLen">
+            <option value="short">短め（1,500字程度）</option>
+            <option value="mid" selected>標準（3,000字程度）</option>
+            <option value="long">長め（5,000字程度）</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">構成フレームワーク</div>
+      <div class="framework-btns">
+        <button class="fw-btn active" onclick="selectFW(this,'prep')">PREP法</button>
+        <button class="fw-btn" onclick="selectFW(this,'pasona')">PASONA法</button>
+        <button class="fw-btn" onclick="selectFW(this,'story')">ストーリー型</button>
+        <button class="fw-btn" onclick="selectFW(this,'howto')">ハウツー型</button>
+      </div>
+      <div class="framework-text" id="fwDesc">PREP法：結論→理由→具体例→まとめ の順で、読者に説得力を持って伝えます。論理的で読みやすく、ビジネス系ノウハウ記事に最適です。</div>
+    </div>
+    <div class="card">
+      <div class="card-title">有料パート設計（オプション）</div>
+      <div class="form-group">
+        <label>有料部分で公開するコンテンツ（具体的に）</label>
+        <textarea id="paidContent" rows="3" placeholder="例：実際に使ったプロンプト全文、月収推移データ、失敗パターン3つ"></textarea>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="generateArticle()" id="articleBtn" style="margin-bottom:24px;">🚀 記事を生成する</button>
+    <div id="articleResult" style="display:none;">
+      <div class="card">
+        <div class="card-title">AI生成：記事本文</div>
+        <div class="generated-box" id="articleGenerated"></div>
+        <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="btn btn-secondary btn-sm" onclick="copyToEdit()">👇 編集エリアにコピー</button>
+          <button class="btn btn-secondary btn-sm" onclick="copyEl('articleGenerated')">📋 クリップボードにコピー</button>
+        </div>
+      </div>
+      <div class="card" style="border-color:rgba(124,111,255,0.4);">
+        <div class="card-title" style="color:var(--accent2);">✏️ 自分編集エリア（ここで加筆・修正してください）</div>
+        <textarea class="edit-area" id="editArea" placeholder="AIが生成した記事をここに貼り付けて、自分の体験談・感想・事実確認を加えてください。"></textarea>
+        <div style="margin-top:12px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+          <button class="btn btn-primary btn-sm" onclick="sendToChecker()">🛡️ チェッカーに送る</button>
+          <button class="btn btn-secondary btn-sm" onclick="copyEl('editArea')">📋 コピー</button>
+        </div>
+      </div>
+      <div class="card" style="background:rgba(65,226,150,0.04);">
+        <div class="card-title">📋 note投稿用（AI利用表記付き）</div>
+        <div class="generated-box" id="finalPost" style="font-size:13px; color:var(--text2);">←「最終版を生成」ボタンを押すと表示されます</div>
+        <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="btn btn-primary btn-sm" onclick="buildFinal()">🔄 最終版を生成</button>
+          <button class="btn btn-secondary btn-sm" onclick="copyEl('finalPost')">📋 コピーしてnoteへ</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- タブ3：投稿チェック -->
+  <div class="tab-panel" id="tab-checker">
+    <div class="section-title">🛡️ 投稿チェッカー</div>
+    <div class="section-sub">規約・著作権・危険表現を投稿前にチェックします</div>
+    <div class="card">
+      <div class="card-title">チェックする記事本文</div>
+      <textarea id="checkText" rows="10" placeholder="チェックしたい記事本文をここに貼り付けてください。記事生成タブから「チェッカーに送る」を使うと自動転送されます。"></textarea>
+      <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="runCheck()">🔍 チェック実行</button>
+        <button class="btn btn-secondary btn-sm" onclick="runAiCheck()" id="aiCheckBtn">🤖 AIによる詳細チェック</button>
+      </div>
+    </div>
+    <div id="checkResult" style="display:none;">
+      <div class="divider"></div>
+      <div style="margin-bottom:12px;"><div class="section-title" id="checkScore" style="font-size:17px;"></div></div>
+      <div id="scoreBar"></div>
+      <div id="checkItems"></div>
+      <div id="aiCheckResult"></div>
+    </div>
+  </div>
+
+  <!-- タブ4：スケジュール -->
+  <div class="tab-panel" id="tab-schedule">
+    <div class="section-title">📅 投稿スケジュール管理</div>
+    <div class="section-sub">記事の投稿予定・進捗をブラウザに保存して管理します</div>
+    <div class="card">
+      <div class="card-title">新しい記事を追加</div>
+      <div class="form-row">
+        <div class="form-group" style="margin:0">
+          <label>記事タイトル</label>
+          <input type="text" id="schedTitle" placeholder="例：ChatGPTで副業を始めた話">
+        </div>
+        <div class="form-group" style="margin:0">
+          <label>投稿予定日</label>
+          <input type="date" id="schedDate">
+        </div>
+      </div>
+      <div class="form-row" style="margin-top:12px;">
+        <div class="form-group" style="margin:0">
+          <label>ジャンル</label>
+          <input type="text" id="schedGenre" placeholder="例：AI活用">
+        </div>
+        <div class="form-group" style="margin:0">
+          <label>ステータス</label>
+          <select id="schedStatus">
+            <option value="draft">📝 下書き中</option>
+            <option value="ready">✅ チェック済み</option>
+            <option value="posted">🚀 投稿済み</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-top:12px;"><button class="btn btn-primary" onclick="addSchedule()">➕ 追加する</button></div>
+    </div>
+    <div class="card" id="weekSummary"></div>
+    <div class="card" style="padding:0; overflow:hidden;">
+      <div style="padding:16px 20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+        <div class="card-title" style="margin:0;">記事一覧</div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+          <button class="btn btn-secondary btn-sm" onclick="filterSched('all')">全て</button>
+          <button class="btn btn-secondary btn-sm" onclick="filterSched('draft')">下書き</button>
+          <button class="btn btn-secondary btn-sm" onclick="filterSched('ready')">済み</button>
+          <button class="btn btn-secondary btn-sm" onclick="filterSched('posted')">投稿済み</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="schedule-table">
+          <thead><tr><th>予定日</th><th>タイトル</th><th>ジャンル</th><th>ステータス</th><th>操作</th></tr></thead>
+          <tbody id="schedBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// Cloudflare Workers プロキシ経由でClaude APIを呼び出す
+const WORKER_URL = 'https://note-studio.yymmatsu.workers.dev';
+
+let selectedGenre = '副業・お金のノウハウ';
+let selectedFW = 'prep';
+let schedules = JSON.parse(localStorage.getItem('noteStudioSched') || '[]');
+let schedFilter = 'all';
+
+const fwDescs = {
+  prep: 'PREP法：結論→理由→具体例→まとめ の順で、読者に説得力を持って伝えます。ビジネス系ノウハウ記事に最適です。',
+  pasona: 'PASONA法：問題提示→共感→解決策→提案→絞り込み→行動 の順で感情を動かします。有料記事・セールス系に強力です。',
+  story: 'ストーリー型：自分の失敗→転換点→成功のドラマ構成。読者が感情移入しやすく、シェアされやすい構成です。',
+  howto: 'ハウツー型：ステップ1→2→3…の手順書スタイル。保存・再読されやすい永続型コンテンツです。'
+};
+
+window.onload = () => {
+  document.getElementById('schedDate').value = new Date().toISOString().split('T')[0];
+  renderSched(); renderWeekSummary();
+};
+
+async function testApi() {
+  const btn = event.currentTarget;
+  btn.textContent = 'テスト中...';
+  btn.disabled = true;
+  try {
+    await callClaude('「接続OK」とだけ返してください。', 30);
+    alert('✅ Worker接続成功！Claude APIと正常につながっています。');
+  } catch(e) {
+    alert('❌ 接続失敗：' + e.message + '\n\nWorkerのデプロイとAPIキーの環境変数を確認してください。');
+  }
+  btn.textContent = '接続テスト';
+  btn.disabled = false;
+}
+
+async function callClaude(prompt, maxTokens = 1500) {
+  const res = await fetch(WORKER_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      max_tokens: maxTokens,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+  if (!res.ok) { const e = await res.json(); throw new Error(e.error?.message || 'Workerエラー（ステータス：' + res.status + '）'); }
+  const data = await res.json();
+  return data.content.map(b => b.text || '').join('');
+}
+
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-' + id).classList.add('active');
+}
+
+function toggleGenre(el, genre) {
+  document.querySelectorAll('.genre-tag').forEach(t => t.classList.remove('active'));
+  el.classList.add('active'); selectedGenre = genre;
+}
+
+function selectFW(el, fw) {
+  document.querySelectorAll('.fw-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active'); selectedFW = fw;
+  document.getElementById('fwDesc').textContent = fwDescs[fw];
+}
+
+async function generateNeta() {
+  const target = document.getElementById('netatarget').value || '一般読者';
+  const angle = document.getElementById('netaangle').value;
+  const keyword = document.getElementById('netakeyword').value;
+  const btn = document.getElementById('netaBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:8px;"><span style="width:16px;height:16px;border:2px solid #2e2e40;border-top-color:#41e296;border-radius:50%;animation:spin 0.8s linear infinite;display:inline-block;"></span>生成中...</span>';
+  const prompt = `あなたはnoteで月100万円稼ぐプロのコンテンツマーケターです。
+以下の条件でnote記事のタイトル案を10本生成してください。
+
+ジャンル：${selectedGenre}
+ターゲット読者：${target}
+切り口・テイスト：${angle}
+キーワード：${keyword || 'なし'}
+
+条件：
+- クリック率が高い（読者の興味を強く惹く）タイトル
+- 数字・具体性を入れると効果的
+- note特有の「読まれるタイトル」を意識
+- タイトルのみ番号付きリストで出力（説明文不要）
+- 日本語のみ
+
+タイトル10本：`;
+  try {
+    const result = await callClaude(prompt, 900);
+    const lines = result.split('\n').filter(l => l.trim() && /^\d/.test(l.trim()));
+    let html = '<div class="card"><div class="card-title">生成されたタイトル案 ' + lines.length + '本</div><ul class="title-list">';
+    lines.forEach(line => {
+      const title = line.replace(/^\d+[\.\)。]\s*/, '').trim();
+      if (!title) return;
+      html += `<li class="title-item"><span class="title-text">${escHtml(title)}</span><button class="title-use-btn" onclick="useTitle(this)">このタイトルを使う →</button></li>`;
+    });
+    html += '</ul></div>';
+    document.getElementById('netaResult').innerHTML = html;
+  } catch(e) {
+    document.getElementById('netaResult').innerHTML = `<div class="check-ng check-result"><span class="check-icon">❌</span><div><div class="check-label">エラー</div><div class="check-detail">${escHtml(e.message)}</div></div></div>`;
+  }
+  btn.disabled = false;
+  btn.textContent = '✨ タイトル案を10本生成する';
+}
+
+function useTitle(btn) {
+  const title = btn.closest('.title-item').querySelector('.title-text').textContent;
+  document.getElementById('articleTitle').value = title;
+  document.querySelectorAll('.tab-btn')[1].click();
+}
+
+async function generateArticle() {
+  const title = document.getElementById('articleTitle').value;
+  const target = document.getElementById('articleTarget').value || '一般読者';
+  const len = document.getElementById('articleLen').value;
+  const paid = document.getElementById('paidContent').value;
+  if (!title) { alert('タイトルを入力してください'); return; }
+  const btn = document.getElementById('articleBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:8px;"><span style="width:16px;height:16px;border:2px solid #2e2e40;border-top-color:#41e296;border-radius:50%;animation:spin 0.8s linear infinite;display:inline-block;"></span>記事を生成中（少し時間がかかります）...</span>';
+  const lenMap = { short: '1500字', mid: '3000字', long: '5000字' };
+  const fwMap = {
+    prep: '【PREP法】結論（得られる成果）→理由→具体例（体験談・事例）→まとめ の構成',
+    pasona: '【PASONA法】Problem→Affinity（共感）→Solution→Offer→Narrow→Action の構成',
+    story: '【ストーリー型】失敗・悩み→転換点→実践と変化→現在→読者へのメッセージ の5部構成',
+    howto: '【ハウツー型】冒頭（解決できること）→ステップ1,2,3→よくある失敗→まとめ の手順書スタイル'
+  };
+  const prompt = `あなたはnoteで実績のあるプロライターです。以下の条件で高品質なnote記事を生成してください。
+
+タイトル：${title}
+ターゲット読者：${target}
+文字数：${lenMap[len]}程度
+構成フレームワーク：${fwMap[selectedFW]}
+${paid ? '有料パート内容：' + paid : '（フリー記事として構成）'}
+
+執筆ルール：
+- 読者が「自分ごと化」できる書き方
+- 具体的な数字・事例を入れる
+- 各セクションに見出し（##）をつける
+- 導入文で読者の悩みに強く共感する
+${paid ? '- 記事後半（---以降）を有料パートとして設計する' : ''}
+
+記事本文：`;
+  try {
+    const result = await callClaude(prompt, 2500);
+    document.getElementById('articleGenerated').textContent = result;
+    document.getElementById('articleResult').style.display = 'block';
+    document.getElementById('articleGenerated').scrollIntoView({ behavior: 'smooth' });
+  } catch(e) { alert('エラー：' + e.message); }
+  btn.disabled = false;
+  btn.textContent = '🚀 記事を生成する';
+}
+
+function copyToEdit() {
+  document.getElementById('editArea').value = document.getElementById('articleGenerated').textContent;
+  document.getElementById('editArea').scrollIntoView({ behavior: 'smooth' });
+}
+
+function buildFinal() {
+  const edited = document.getElementById('editArea').value;
+  if (!edited.trim()) { alert('編集エリアに記事を入力してください'); return; }
+  document.getElementById('finalPost').textContent = edited + '\n\n---\n※ この記事はClaude AI（Anthropic）を活用して作成し、筆者が編集・加筆しています。';
+}
+
+async function copyEl(id) {
+  const el = document.getElementById(id);
+  const text = el.value !== undefined ? el.value : el.textContent;
+  await navigator.clipboard.writeText(text);
+  const orig = el.style.borderColor;
+  el.style.borderColor = 'var(--accent)';
+  setTimeout(() => el.style.borderColor = orig, 1000);
+}
+
+function sendToChecker() {
+  document.getElementById('checkText').value = document.getElementById('editArea').value;
+  document.querySelectorAll('.tab-btn')[2].click();
+  setTimeout(runCheck, 100);
+}
+
+function runCheck() {
+  const text = document.getElementById('checkText').value;
+  if (!text.trim()) { alert('テキストを入力してください'); return; }
+  const checks = [
+    { label: '著作権・引用チェック', fn: t => {
+      const bad = ['転載', 'コピーしました'].filter(w => t.includes(w));
+      if (bad.length) return { level:'warn', detail:`「${bad.join('、')}」が含まれています。引用元の明示を確認してください。` };
+      return { level:'ok', detail:'著作権上の問題は検出されませんでした。' };
+    }},
+    { label: '医療・健康の誇大表現', fn: t => {
+      const bad = ['必ず治る','完全に治癒','確実に痩せる','副作用なし'].filter(w => t.includes(w));
+      if (bad.length) return { level:'ng', detail:`危険：「${bad.join('、')}」は医療誇大広告にあたる可能性があります。` };
+      return { level:'ok', detail:'医療・健康系の問題表現は検出されませんでした。' };
+    }},
+    { label: '金融・投資の断定表現', fn: t => {
+      const ng = ['必ず儲かる','絶対に稼げる','元本保証','確実に利益'].filter(w => t.includes(w));
+      if (ng.length) return { level:'ng', detail:`危険：「${ng.join('、')}」は金融商品取引法に抵触する可能性があります。` };
+      const warn = ['年利','FX','仮想通貨','暗号資産'].filter(w => t.includes(w));
+      if (warn.length) return { level:'warn', detail:`確認：「${warn.join('、')}」を含む場合、リスク明示と免責事項の記載を推奨します。` };
+      return { level:'ok', detail:'金融系の問題表現は検出されませんでした。' };
+    }},
+    { label: 'アフィリエイト・広告表記', fn: t => {
+      const links = (t.match(/https?:\/\//g) || []).length;
+      if (links > 3) return { level:'warn', detail:`URLが${links}件含まれています。アフィリエイトリンクの場合はPR表記が必要です。` };
+      return { level:'ok', detail:'広告・PR表記上の問題は検出されませんでした。' };
+    }},
+    { label: 'AI利用表記（note2026年規約）', fn: t => {
+      if (t.includes('AIを活用') || t.includes('AI生成') || t.includes('Claude') || t.includes('ChatGPT')) {
+        if (t.includes('AIを活用して作成') || t.includes('AI利用')) return { level:'ok', detail:'AI利用表記が確認されました。規約に対応しています。' };
+        return { level:'warn', detail:'AI関連の記述がありますが、「AI利用表記」の明記を推奨します（note2026年規約対応）。' };
+      }
+      return { level:'warn', detail:'AI生成コンテンツを含む場合は「この記事はAIを活用して作成しています」の一文を追加してください。' };
+    }},
+    { label: '文字数・読みやすさ', fn: t => {
+      const len = t.replace(/\s/g,'').length;
+      if (len < 500) return { level:'warn', detail:`文字数が${len}字と少なめです。noteで読まれるには1,500字以上を推奨します。` };
+      if (len > 8000) return { level:'warn', detail:`文字数が${len}字です。長い場合は見出しや区切りを充実させてください。` };
+      return { level:'ok', detail:`文字数：${len}字。noteに適した長さです。` };
+    }},
+  ];
+
+  let okCount = 0, warnCount = 0, ngCount = 0;
+  let html = '';
+  checks.forEach(c => {
+    const r = c.fn(text);
+    if (r.level==='ok') okCount++; else if (r.level==='warn') warnCount++; else ngCount++;
+    const icon = r.level==='ok'?'✅':r.level==='warn'?'⚠️':'❌';
+    html += `<div class="check-result check-${r.level}"><span class="check-icon">${icon}</span><div><div class="check-label">${c.label}</div><div class="check-detail">${r.detail}</div></div></div>`;
+  });
+
+  let scoreLabel, scoreColor;
+  if (ngCount > 0) { scoreLabel = `❌ 投稿NG（問題${ngCount}件）`; scoreColor = 'var(--accent3)'; }
+  else if (warnCount > 0) { scoreLabel = `⚠️ 要確認（警告${warnCount}件）`; scoreColor = 'var(--accent4)'; }
+  else { scoreLabel = '✅ 投稿OK！問題なし'; scoreColor = 'var(--accent)'; }
+
+  const okPct = Math.round(okCount / checks.length * 100);
+  document.getElementById('checkScore').textContent = scoreLabel;
+  document.getElementById('checkScore').style.color = scoreColor;
+  document.getElementById('scoreBar').innerHTML = `<div class="score-bar-wrap"><div class="score-bar-label"><span>安全スコア</span><span style="color:${scoreColor};font-weight:700;">${okPct}%</span></div><div class="score-bar-track"><div class="score-bar-fill ${ngCount>0?'fill-red':warnCount>0?'fill-yellow':'fill-green'}" style="width:${okPct}%"></div></div></div>`;
+  document.getElementById('checkItems').innerHTML = html;
+  document.getElementById('checkResult').style.display = 'block';
+}
+
+async function runAiCheck() {
+  const text = document.getElementById('checkText').value;
+  if (!text.trim()) { alert('テキストを入力してください'); return; }
+  const btn = document.getElementById('aiCheckBtn');
+  btn.disabled = true; btn.textContent = '分析中...';
+  const prompt = `あなたはnote規約と読者心理の専門家です。以下の記事本文を読んで：
+1. 規約違反・表現上のリスクがあれば具体的に指摘
+2. 読者の心を動かす改善ポイント（タイトル・導入・クロージング）
+3. SEO・アルゴリズム的に強化できるポイント
+を箇条書きで簡潔に教えてください。
+
+---記事本文---
+${text.slice(0,2000)}
+---`;
+  try {
+    const result = await callClaude(prompt, 800);
+    document.getElementById('aiCheckResult').innerHTML = `<div class="card" style="margin-top:16px;border-color:rgba(124,111,255,0.4);"><div class="card-title" style="color:var(--accent2);">🤖 AIによる詳細フィードバック</div><div style="font-size:14px;line-height:1.8;white-space:pre-wrap;">${escHtml(result)}</div></div>`;
+  } catch(e) {
+    document.getElementById('aiCheckResult').innerHTML = `<div class="check-ng check-result" style="margin-top:16px;"><span>❌</span><div>${escHtml(e.message)}</div></div>`;
+  }
+  btn.disabled = false; btn.textContent = '🤖 AIによる詳細チェック';
+}
+
+// スケジュール管理
+function addSchedule() {
+  const title = document.getElementById('schedTitle').value.trim();
+  if (!title) { alert('タイトルを入力してください'); return; }
+  schedules.push({ id: Date.now(), title, date: document.getElementById('schedDate').value, genre: document.getElementById('schedGenre').value.trim(), status: document.getElementById('schedStatus').value });
+  schedules.sort((a,b) => (a.date||'').localeCompare(b.date||''));
+  localStorage.setItem('noteStudioSched', JSON.stringify(schedules));
+  document.getElementById('schedTitle').value = '';
+  document.getElementById('schedGenre').value = '';
+  renderSched(); renderWeekSummary();
+}
+
+function updateStatus(id, status) {
+  const item = schedules.find(s => s.id === id);
+  if (item) { item.status = status; localStorage.setItem('noteStudioSched', JSON.stringify(schedules)); renderSched(); renderWeekSummary(); }
+}
+
+function deleteSched(id) {
+  if (!confirm('削除しますか？')) return;
+  schedules = schedules.filter(s => s.id !== id);
+  localStorage.setItem('noteStudioSched', JSON.stringify(schedules));
+  renderSched(); renderWeekSummary();
+}
+
+function filterSched(f) { schedFilter = f; renderSched(); }
+
+function renderSched() {
+  const filtered = schedFilter === 'all' ? schedules : schedules.filter(s => s.status === schedFilter);
+  const statusMap = { draft: '<span class="status-badge status-draft">📝 下書き</span>', ready: '<span class="status-badge status-ready">✅ チェック済み</span>', posted: '<span class="status-badge status-posted">🚀 投稿済み</span>' };
+  if (!filtered.length) {
+    document.getElementById('schedBody').innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:32px;">記事がありません。上から追加してください。</td></tr>';
+    return;
+  }
+  document.getElementById('schedBody').innerHTML = filtered.map(s => `
+    <tr>
+      <td style="white-space:nowrap;color:var(--text2);font-size:13px;">${s.date||'未設定'}</td>
+      <td style="font-weight:500;">${escHtml(s.title)}</td>
+      <td style="color:var(--text2);font-size:13px;">${escHtml(s.genre||'-')}</td>
+      <td>${statusMap[s.status]}</td>
+      <td style="white-space:nowrap;">
+        <select onchange="updateStatus(${s.id},this.value)" style="font-size:12px;padding:4px 8px;width:auto;margin-right:6px;">
+          <option value="draft" ${s.status==='draft'?'selected':''}>下書き</option>
+          <option value="ready" ${s.status==='ready'?'selected':''}>済み</option>
+          <option value="posted" ${s.status==='posted'?'selected':''}>投稿済み</option>
+        </select>
+        <button class="btn btn-danger" onclick="deleteSched(${s.id})">削除</button>
+      </td>
+    </tr>`).join('');
+}
+
+function renderWeekSummary() {
+  const total = schedules.length;
+  const posted = schedules.filter(s => s.status==='posted').length;
+  const ready = schedules.filter(s => s.status==='ready').length;
+  const draft = schedules.filter(s => s.status==='draft').length;
+  const now = new Date();
+  const ws = new Date(now); ws.setDate(now.getDate()-now.getDay());
+  const we = new Date(ws); we.setDate(ws.getDate()+6);
+  const thisWeek = schedules.filter(s => { if (!s.date) return false; const d = new Date(s.date); return d >= ws && d <= we; });
+  document.getElementById('weekSummary').innerHTML = `
+    <div class="card-title">📊 進捗サマリー</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;text-align:center;margin-bottom:16px;">
+      <div><div style="font-size:28px;font-weight:900;">${total}</div><div style="font-size:12px;color:var(--text3);">合計記事</div></div>
+      <div><div style="font-size:28px;font-weight:900;color:var(--accent);">${posted}</div><div style="font-size:12px;color:var(--text3);">投稿済み</div></div>
+      <div><div style="font-size:28px;font-weight:900;color:var(--accent2);">${ready}</div><div style="font-size:12px;color:var(--text3);">チェック済み</div></div>
+      <div><div style="font-size:28px;font-weight:900;color:var(--text2);">${draft}</div><div style="font-size:12px;color:var(--text3);">下書き中</div></div>
+    </div>
+    <div style="font-size:13px;color:var(--text2);">今週の予定：${thisWeek.length}件${thisWeek.length?'（'+thisWeek.map(s=>s.title.slice(0,12)+'…').join('、')+'）':''}</div>`;
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
