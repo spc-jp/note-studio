@@ -8,14 +8,14 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Zen+Kaku+Gothic+New:wght@400;700;900&display=swap');
   :root {
-    --bg: #0f0f13; --surface: #1a1a24; --surface2: #22222f; --border: #2e2e40;
-    --accent: #41e296; --accent2: #7c6fff; --accent3: #ff6b6b; --accent4: #ffd166;
-    --text: #eaeaf2; --text2: #9090aa; --text3: #5a5a72;
+    --bg: #f5faf7; --surface: #ffffff; --surface2: #eef6f1; --border: #d0e8dc;
+    --accent: #1a9e6a; --accent2: #4a7fff; --accent3: #e05555; --accent4: #e09a00;
+    --text: #1a2e25; --text2: #5a7a6a; --text3: #9ab8aa;
     --radius: 12px; --radius-sm: 8px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Noto Sans JP', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
-  .header { padding: 20px 24px 0; display: flex; align-items: center; gap: 16px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .header { padding: 20px 24px 0; display: flex; align-items: center; gap: 16px; border-bottom: 2px solid var(--border); flex-wrap: wrap; background: #ffffff; }
   .logo { font-family: 'Zen Kaku Gothic New', sans-serif; font-weight: 900; font-size: 20px; color: var(--accent); letter-spacing: -0.5px; white-space: nowrap; }
   .logo span { color: var(--text2); font-weight: 400; font-size: 12px; margin-left: 8px; }
   .tabs { display: flex; margin-left: auto; flex-wrap: wrap; }
@@ -27,7 +27,7 @@
   .tab-panel.active { display: block; }
   .section-title { font-family: 'Zen Kaku Gothic New', sans-serif; font-weight: 900; font-size: 20px; margin-bottom: 6px; }
   .section-sub { color: var(--text2); font-size: 13px; margin-bottom: 24px; }
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(26,158,106,0.06); }
   .card-title { font-size: 12px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
   label { font-size: 13px; color: var(--text2); display: block; margin-bottom: 6px; font-weight: 500; }
   select, input[type="text"], input[type="date"], textarea { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-family: 'Noto Sans JP', sans-serif; font-size: 14px; padding: 10px 14px; outline: none; transition: border-color 0.2s; appearance: none; }
@@ -36,8 +36,8 @@
   .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
   .form-group { margin-bottom: 16px; }
   .btn { padding: 11px 22px; border-radius: var(--radius-sm); border: none; font-family: 'Noto Sans JP', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
-  .btn-primary { background: var(--accent); color: #0f0f13; }
-  .btn-primary:hover { background: #2fd180; transform: translateY(-1px); }
+  .btn-primary { background: var(--accent); color: #ffffff; }
+  .btn-primary:hover { background: #158a5a; transform: translateY(-1px); }
   .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
   .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
   .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
@@ -49,7 +49,7 @@
   .title-item:hover { border-color: var(--accent); }
   .title-text { flex: 1; font-size: 14px; line-height: 1.5; }
   .title-use-btn { background: var(--surface); border: 1px solid var(--accent); color: var(--accent); border-radius: 6px; padding: 5px 12px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; }
-  .title-use-btn:hover { background: var(--accent); color: #0f0f13; }
+  .title-use-btn:hover { background: var(--accent); color: #ffffff; }
   .generated-box { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px; font-size: 14px; line-height: 1.8; white-space: pre-wrap; min-height: 120px; color: var(--text); }
   .edit-area { width: 100%; min-height: 200px; background: var(--surface2); border: 1px solid var(--accent2); border-radius: var(--radius-sm); color: var(--text); font-family: 'Noto Sans JP', sans-serif; font-size: 14px; padding: 14px; line-height: 1.8; resize: vertical; outline: none; }
   .check-result { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border-radius: var(--radius-sm); margin-bottom: 8px; font-size: 14px; }
@@ -354,7 +354,7 @@ async function generateNeta() {
   const keyword = document.getElementById('netakeyword').value;
   const btn = document.getElementById('netaBtn');
   btn.disabled = true;
-  btn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:8px;"><span style="width:16px;height:16px;border:2px solid #2e2e40;border-top-color:#41e296;border-radius:50%;animation:spin 0.8s linear infinite;display:inline-block;"></span>生成中...</span>';
+  btn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:8px;"><span style="width:16px;height:16px;border:2px solid #d0e8dc;border-top-color:#1a9e6a;border-radius:50%;animation:spin 0.8s linear infinite;display:inline-block;"></span>生成中...</span>';
   const prompt = `あなたはnoteで月100万円稼ぐプロのコンテンツマーケターです。
 以下の条件でnote記事のタイトル案を10本生成してください。
 
@@ -403,7 +403,7 @@ async function generateArticle() {
   if (!title) { alert('タイトルを入力してください'); return; }
   const btn = document.getElementById('articleBtn');
   btn.disabled = true;
-  btn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:8px;"><span style="width:16px;height:16px;border:2px solid #2e2e40;border-top-color:#41e296;border-radius:50%;animation:spin 0.8s linear infinite;display:inline-block;"></span>記事を生成中（少し時間がかかります）...</span>';
+  btn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:8px;"><span style="width:16px;height:16px;border:2px solid #d0e8dc;border-top-color:#1a9e6a;border-radius:50%;animation:spin 0.8s linear infinite;display:inline-block;"></span>記事を生成中（少し時間がかかります）...</span>';
   const lenMap = { short: '1500字', mid: '3000字', long: '5000字' };
   const fwMap = {
     prep: '【PREP法】結論（得られる成果）→理由→具体例（体験談・事例）→まとめ の構成',
