@@ -867,13 +867,13 @@ document.getElementById('sale-target').addEventListener('change', function() {
   custom.style.display = this.value === 'その他（自由入力）' ? 'block' : 'none';
 });
 
-async function callClaude(prompt) {
+async function callClaude(prompt, model = 'claude-sonnet-4-20250514', maxTokens = 1200) {
   const res = await fetch(API_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1000,
+      model: model,
+      max_tokens: maxTokens,
       messages: [{ role: 'user', content: prompt }]
     })
   });
@@ -992,128 +992,94 @@ async function generateSaleArticle() {
 
   document.getElementById('sale-loading').classList.add('visible');
   document.getElementById('sale-output').classList.remove('visible');
-
-  const prompt = `あなたはnoteのトップクリエイター（累計売上100万円超）が実践する手法を熟知した販売記事の専門ライターです。
-以下の情報を使って、noteで販売するための記事を生成してください。
-
-【アプリ名】${appname}
-【ターゲット】${target}
-【解決できる悩み・価値】${value}
-【販売価格】¥${price}
-【著者プロフィール】${profile}
-
-【無料エリアの生成ルール（冒頭200字が勝負）】
-最初の1スクロール以内で読者の心をつかむため、以下の3要素を必ず盛り込むこと。
-・（A）共感・問いかけ：読者の悩みをズバリ言い当てる
-・（B）変化の物語：数字を伴うビフォーアフター（例：「30分かかっていた作業が5分に」）
-・（C）ベネフィットの提示：この記事を読むと何が手に入るか
-
-無料エリアの構成は以下の順序で書くこと。
-1. 冒頭（共感・問いかけ）：読者の悩みに共感し、記事の価値を提示する
-2. 自己紹介・ビフォーの描写：成功者としてではなく読者と横並びの視点で語る
-3. 背景・問題提起：なぜこのテーマが重要なのかを納得させる
-4. 解決策の概要：このアプリで何が解決できるかを示す
-
-【見出しルール】
-・大見出しは「# 」で始める
-・中見出しは「## 」で始める
-・各見出しに「ここで何がわかるか」という小さなゴールを明記する
-
-【区切りルール】
-・無料部分の末尾に「＝＝＝ここから有料＝＝＝」を必ず入れる
-・有料部分の先頭に「---」を単独行で入れる（noteの有料区切り線になります）
-
-【有料エリアの生成ルール】
-・「パスワードは以下です」と書き、パスワードを目立つ形で表示する
-・使い方3ステップを簡潔に書く
-・最後に「まとめ＋次の行動（CTA）」を入れて読者が行動しやすい設計にする
-
-【有料部分に必ず含める情報】
-パスワード：${pw}
-${urls ? 'アプリURL：\n' + urls : ''}
-
-【文体ルール】
-・親しみやすく読者に寄り添うトーンで書く
-・絵文字を適度に使いSNSでシェアしたくなる内容にする
-・タイトルは先頭に「タイトル：」で始めて提案する`;
-
-  const result = await callClaude(prompt);
-  document.getElementById('sale-loading').classList.remove('visible');
-
-  // 無料・有料分割
-  const divider = '＝＝＝ここから有料＝＝＝';
-  const parts = result.split(divider);
-  generatedFree = parts[0] || result;
-  generatedPaid = parts[1] || '';
-
-  // プレビュー生成
-  let previewHTML = '';
-  previewHTML += `<div style="margin-bottom:16px;">${escapeHtml(generatedFree).replace(/\n/g, '<br>')}</div>`;
-  previewHTML += `<div class="paid-divider">
-    <div>
-      <div class="paid-divider-label">💰 ここから有料（¥${price}）</div>
-      <div class="paid-divider-sub">noteで購入後、続きが読めます</div>
-    </div>
-  </div>`;
-  if (generatedPaid) {
-    previewHTML += `<div class="paid-section">`;
-    // パスワード強調
-    const paidFormatted = generatedPaid
-      .replace(/(パスワード[：:]\s*)/g, '<strong style="color:#0f5c3a;">$1</strong>')
-      .replace(new RegExp(escapeRegex(pw), 'g'), `<span class="pw-box">${pw}</span>`);
-    previewHTML += paidFormatted.replace(/\n/g, '<br>');
-    previewHTML += `</div>`;
-  }
-  document.getElementById('sale-preview').innerHTML = previewHTML;
-
-  // プレーンテキスト
-  const rawText = generatedFree + '\n\n---\n' + generatedPaid;
-  document.getElementById('sale-raw').innerText = rawText;
-
-  document.getElementById('sale-output').classList.add('visible');
-
-  // 販売戦略アドバイスを生成
-  generateSaleAdvice(appname, target, price);
-}
-
-async function generateSaleAdvice(appname, target, price) {
-  document.getElementById('advice-loading').style.display = 'block';
+  document.getElementById('advice-loading').style.display = 'none';
   document.getElementById('advice-output').style.display = 'none';
 
-  const priceNum = parseInt(price.replace(/[^0-9]/g, '')) || 2980;
-  const lowerPrice = Math.floor(priceNum * 0.6 / 100) * 100;
-  const midPrice = Math.floor(priceNum * 0.8 / 100) * 100;
+  // 記事プロンプト（スリム化）
+  const articlePrompt = `noteトップクリエイターの手法で販売記事を生成してください。
 
-  const advicePrompt = `あなたはnoteの販売戦略の専門家です。
-以下の情報をもとに、具体的な販売戦略アドバイスを日本語で提案してください。
+【基本情報】
+アプリ名：${appname}／ターゲット：${target}
+解決する悩み：${value}
+価格：¥${price}／著者：${profile}
 
-【アプリ名】${appname}
-【ターゲット】${target}
-【販売予定価格】¥${price}
+【無料エリア（400字以内）】
+・冒頭：読者の悩みをズバリ言い当てる問いかけ
+・ビフォーアフター：数字を使った変化の物語
+・ベネフィット：この記事で手に入ること
+・# で大見出し、## で中見出しをつける
 
-以下の3点について、それぞれ箇条書きで具体的に回答してください。
+【区切り】無料末尾に「＝＝＝ここから有料＝＝＝」を入れる
 
-【1. 価格設定の戦略】
-・初期価格はいくらに設定すべきか（試し買いを促す価格）
-・値上げのタイミングと価格推移の具体案
-・「今が最安値」という限定感の演出方法
+【有料エリア（300字以内）】
+・有料先頭に「---」を単独行で入れる
+・「パスワードは以下です」→ パスワードを目立つ形で表示
+・使い方3ステップ
+・まとめ＋次の行動（CTA）
 
-【2. SNS告知の具体的な投稿戦略】
-・効果的な投稿時間帯（曜日・時間）
-・アイキャッチ＋1行コピーの文章例を2パターン
-・X（旧Twitter）とFacebookそれぞれの投稿の違い
+パスワード：${pw}
+${urls ? 'URL：' + urls : ''}
 
-【3. note内SEO対策】
-・タイトルに入れるべきキーワード案を3つ
-・シリーズ化のアイデア
-・スキ・コメントを増やすための工夫
+タイトルを「タイトル：」で先頭に提案。絵文字を適度に使う。`;
 
-出力は見やすく箇条書きで、すぐ実践できる具体的な内容にしてください。`;
+  // 販売戦略プロンプト（Haiku用・簡潔に）
+  const advicePrompt = `noteの販売戦略を箇条書きで提案してください。
+アプリ：${appname}／ターゲット：${target}／価格：¥${price}
 
-  const adviceResult = await callClaude(advicePrompt);
-  document.getElementById('advice-loading').style.display = 'none';
-  document.getElementById('advice-text').innerText = adviceResult;
-  document.getElementById('advice-output').style.display = 'block';
+1.価格戦略（初期価格・値上げタイミング・限定感の演出）
+2.SNS告知（効果的な時間帯・投稿文例2パターン・XとFacebookの違い）
+3.note SEO（キーワード案3つ・シリーズ化・スキを増やす工夫）
+
+各項目3〜4行で簡潔に。すぐ実践できる内容で。`;
+
+  try {
+    // 記事生成とアドバイス生成を並列実行
+    const [articleResult, adviceResult] = await Promise.all([
+      callClaude(articlePrompt, 'claude-sonnet-4-20250514', 1500),
+      callClaude(advicePrompt, 'claude-haiku-4-5-20251001', 800)
+    ]);
+
+    document.getElementById('sale-loading').classList.remove('visible');
+
+    // 無料・有料分割
+    const divider = '＝＝＝ここから有料＝＝＝';
+    const parts = articleResult.split(divider);
+    generatedFree = parts[0] || articleResult;
+    generatedPaid = parts[1] || '';
+
+    // プレビュー生成
+    let previewHTML = '';
+    previewHTML += `<div style="margin-bottom:16px;">${escapeHtml(generatedFree).replace(/\n/g, '<br>')}</div>`;
+    previewHTML += `<div class="paid-divider">
+      <div>
+        <div class="paid-divider-label">💰 ここから有料（¥${price}）</div>
+        <div class="paid-divider-sub">noteで購入後、続きが読めます</div>
+      </div>
+    </div>`;
+    if (generatedPaid) {
+      previewHTML += `<div class="paid-section">`;
+      const paidFormatted = generatedPaid
+        .replace(/(パスワード[：:]\s*)/g, '<strong style="color:#0f5c3a;">$1</strong>')
+        .replace(new RegExp(escapeRegex(pw), 'g'), `<span class="pw-box">${pw}</span>`);
+      previewHTML += paidFormatted.replace(/\n/g, '<br>');
+      previewHTML += `</div>`;
+    }
+    document.getElementById('sale-preview').innerHTML = previewHTML;
+
+    // プレーンテキスト
+    const rawText = generatedFree + '\n\n---\n' + generatedPaid;
+    document.getElementById('sale-raw').innerText = rawText;
+
+    document.getElementById('sale-output').classList.add('visible');
+
+    // 販売戦略アドバイス表示
+    document.getElementById('advice-text').innerText = adviceResult;
+    document.getElementById('advice-output').style.display = 'block';
+
+  } catch(e) {
+    document.getElementById('sale-loading').classList.remove('visible');
+    alert('生成中にエラーが発生しました。もう一度お試しください。');
+  }
 }
 
 function escapeHtml(str) {
