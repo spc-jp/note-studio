@@ -718,6 +718,44 @@
       </div>
       <p style="font-size:0.75rem;color:var(--gray);margin-top:10px;">※ コピペするだけで見出し・有料区切り線が自動で反映されます（# = 大見出し、## = 中見出し、--- = 有料区切り線）</p>
     </div>
+
+    <!-- 販売戦略アドバイスエリア -->
+    <div id="advice-loading" style="display:none;text-align:center;padding:24px;color:var(--gray);">
+      <div class="spinner"></div>
+      <p style="margin-top:8px;font-size:0.85rem;">販売戦略アドバイスを生成中...</p>
+    </div>
+
+    <div id="advice-output" style="display:none;">
+      <div style="background:linear-gradient(135deg,#0f5c3a,#1A9E6A);border-radius:12px;padding:4px;margin-top:4px;">
+        <div style="background:white;border-radius:10px;overflow:hidden;">
+          <div style="background:linear-gradient(135deg,#0f5c3a,#1A9E6A);padding:14px 18px;display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div style="color:white;font-weight:700;font-size:0.95rem;">📊 販売戦略アドバイス</div>
+              <div style="color:rgba(255,255,255,0.8);font-size:0.75rem;margin-top:2px;">トップクリエイターの手法をもとにAIが自動生成</div>
+            </div>
+            <button class="btn btn-copy btn-sm" onclick="copyAdvice()" style="color:white;background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.4);">📋 コピー</button>
+          </div>
+          <div style="padding:20px;">
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;">
+              <div style="background:#e6f7f1;border-radius:8px;padding:10px;text-align:center;border:1px solid #c3e8d8;">
+                <div style="font-size:1.1rem;margin-bottom:4px;">💰</div>
+                <div style="font-size:0.72rem;font-weight:700;color:#0f5c3a;">価格戦略</div>
+              </div>
+              <div style="background:#e6f7f1;border-radius:8px;padding:10px;text-align:center;border:1px solid #c3e8d8;">
+                <div style="font-size:1.1rem;margin-bottom:4px;">📱</div>
+                <div style="font-size:0.72rem;font-weight:700;color:#0f5c3a;">SNS告知</div>
+              </div>
+              <div style="background:#e6f7f1;border-radius:8px;padding:10px;text-align:center;border:1px solid #c3e8d8;">
+                <div style="font-size:1.1rem;margin-bottom:4px;">🔍</div>
+                <div style="font-size:0.72rem;font-weight:700;color:#0f5c3a;">SEO対策</div>
+              </div>
+            </div>
+            <div id="advice-text" style="font-size:0.87rem;line-height:1.9;color:#1f2937;white-space:pre-wrap;background:#f8fffe;border-radius:8px;padding:16px;border:1px solid #c3e8d8;max-height:400px;overflow-y:auto;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -955,7 +993,7 @@ async function generateSaleArticle() {
   document.getElementById('sale-loading').classList.add('visible');
   document.getElementById('sale-output').classList.remove('visible');
 
-  const prompt = `あなたはnoteの販売記事専門のライターです。
+  const prompt = `あなたはnoteのトップクリエイター（累計売上100万円超）が実践する手法を熟知した販売記事の専門ライターです。
 以下の情報を使って、noteで販売するための記事を生成してください。
 
 【アプリ名】${appname}
@@ -964,20 +1002,40 @@ async function generateSaleArticle() {
 【販売価格】¥${price}
 【著者プロフィール】${profile}
 
-【生成ルール】
-1. 無料部分（300〜500字）：共感できる導入、悩みの描写、このアプリで解決できることの概要
-   ・大見出しは「# 」、中見出しは「## 」で始めること（noteにコピペで自動的に見出しになります）
-2. 無料部分の末尾に「＝＝＝ここから有料＝＝＝」という区切り文を必ず入れる
-3. 有料部分の先頭に「---」を単独行で入れる（noteで有料区切り線になります）
-4. 有料部分（200〜300字）：「パスワードは以下です」と書き、下記のパスワードを枠で囲んで大きく表示してから、使い方3ステップを簡潔に書く
+【無料エリアの生成ルール（冒頭200字が勝負）】
+最初の1スクロール以内で読者の心をつかむため、以下の3要素を必ず盛り込むこと。
+・（A）共感・問いかけ：読者の悩みをズバリ言い当てる
+・（B）変化の物語：数字を伴うビフォーアフター（例：「30分かかっていた作業が5分に」）
+・（C）ベネフィットの提示：この記事を読むと何が手に入るか
+
+無料エリアの構成は以下の順序で書くこと。
+1. 冒頭（共感・問いかけ）：読者の悩みに共感し、記事の価値を提示する
+2. 自己紹介・ビフォーの描写：成功者としてではなく読者と横並びの視点で語る
+3. 背景・問題提起：なぜこのテーマが重要なのかを納得させる
+4. 解決策の概要：このアプリで何が解決できるかを示す
+
+【見出しルール】
+・大見出しは「# 」で始める
+・中見出しは「## 」で始める
+・各見出しに「ここで何がわかるか」という小さなゴールを明記する
+
+【区切りルール】
+・無料部分の末尾に「＝＝＝ここから有料＝＝＝」を必ず入れる
+・有料部分の先頭に「---」を単独行で入れる（noteの有料区切り線になります）
+
+【有料エリアの生成ルール】
+・「パスワードは以下です」と書き、パスワードを目立つ形で表示する
+・使い方3ステップを簡潔に書く
+・最後に「まとめ＋次の行動（CTA）」を入れて読者が行動しやすい設計にする
 
 【有料部分に必ず含める情報】
 パスワード：${pw}
 ${urls ? 'アプリURL：\n' + urls : ''}
 
-文体は親しみやすく、読者に寄り添うトーンで書いてください。
-絵文字を適度に使い、SNSでシェアしたくなるような内容にしてください。
-タイトルも先頭に提案してください（「タイトル：」で始める）。`;
+【文体ルール】
+・親しみやすく読者に寄り添うトーンで書く
+・絵文字を適度に使いSNSでシェアしたくなる内容にする
+・タイトルは先頭に「タイトル：」で始めて提案する`;
 
   const result = await callClaude(prompt);
   document.getElementById('sale-loading').classList.remove('visible');
@@ -1013,6 +1071,49 @@ ${urls ? 'アプリURL：\n' + urls : ''}
   document.getElementById('sale-raw').innerText = rawText;
 
   document.getElementById('sale-output').classList.add('visible');
+
+  // 販売戦略アドバイスを生成
+  generateSaleAdvice(appname, target, price);
+}
+
+async function generateSaleAdvice(appname, target, price) {
+  document.getElementById('advice-loading').style.display = 'block';
+  document.getElementById('advice-output').style.display = 'none';
+
+  const priceNum = parseInt(price.replace(/[^0-9]/g, '')) || 2980;
+  const lowerPrice = Math.floor(priceNum * 0.6 / 100) * 100;
+  const midPrice = Math.floor(priceNum * 0.8 / 100) * 100;
+
+  const advicePrompt = `あなたはnoteの販売戦略の専門家です。
+以下の情報をもとに、具体的な販売戦略アドバイスを日本語で提案してください。
+
+【アプリ名】${appname}
+【ターゲット】${target}
+【販売予定価格】¥${price}
+
+以下の3点について、それぞれ箇条書きで具体的に回答してください。
+
+【1. 価格設定の戦略】
+・初期価格はいくらに設定すべきか（試し買いを促す価格）
+・値上げのタイミングと価格推移の具体案
+・「今が最安値」という限定感の演出方法
+
+【2. SNS告知の具体的な投稿戦略】
+・効果的な投稿時間帯（曜日・時間）
+・アイキャッチ＋1行コピーの文章例を2パターン
+・X（旧Twitter）とFacebookそれぞれの投稿の違い
+
+【3. note内SEO対策】
+・タイトルに入れるべきキーワード案を3つ
+・シリーズ化のアイデア
+・スキ・コメントを増やすための工夫
+
+出力は見やすく箇条書きで、すぐ実践できる具体的な内容にしてください。`;
+
+  const adviceResult = await callClaude(advicePrompt);
+  document.getElementById('advice-loading').style.display = 'none';
+  document.getElementById('advice-text').innerText = adviceResult;
+  document.getElementById('advice-output').style.display = 'block';
 }
 
 function escapeHtml(str) {
@@ -1025,6 +1126,10 @@ function escapeRegex(str) {
 function copyRawText() {
   const raw = document.getElementById('sale-raw').innerText;
   navigator.clipboard.writeText(raw).then(() => showToast());
+}
+function copyAdvice() {
+  const text = document.getElementById('advice-text').innerText;
+  navigator.clipboard.writeText(text).then(() => showToast('販売戦略をコピーしました'));
 }
 function copyFreeOnly() {
   navigator.clipboard.writeText(generatedFree).then(() => showToast('無料部分をコピーしました'));
