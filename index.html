@@ -381,11 +381,99 @@
 <body>
 
 <header>
-  <div>
+  <div style="flex:1;">
     <h1>📝 note収益化スタジオ</h1>
     <p>考えるを、ひとりにしない</p>
   </div>
+  <button onclick="openHelp()" style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.5);color:white;border-radius:8px;padding:8px 14px;font-size:0.82rem;font-weight:700;font-family:'Noto Sans JP',sans-serif;cursor:pointer;white-space:nowrap;" onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">❓ 使い方</button>
 </header>
+
+<!-- 使い方モーダル -->
+<div id="help-modal" onclick="closeHelp(event)" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9000;align-items:center;justify-content:center;padding:16px;">
+  <div onclick="event.stopPropagation()" style="background:white;border-radius:16px;max-width:560px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.25);">
+    <div style="background:linear-gradient(135deg,#1A9E6A,#0f7a50);color:white;padding:20px 24px;border-radius:16px 16px 0 0;display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <div style="font-size:1.1rem;font-weight:700;">📝 使い方ガイド</div>
+        <div style="font-size:0.78rem;opacity:0.8;margin-top:4px;">このアプリでできること・使い方の流れ</div>
+      </div>
+      <button onclick="closeHelpBtn()" style="background:rgba(255,255,255,0.2);border:none;color:white;border-radius:6px;padding:6px 12px;font-size:0.85rem;cursor:pointer;font-family:'Noto Sans JP',sans-serif;">✕ 閉じる</button>
+    </div>
+    <div style="padding:24px;font-size:0.88rem;line-height:1.85;color:#1f2937;">
+
+      <div style="background:#e6f7f1;border-radius:10px;padding:16px 18px;margin-bottom:20px;border-left:4px solid #1A9E6A;">
+        <div style="font-weight:700;color:#0f5c3a;margin-bottom:8px;">🎯 このアプリの目的</div>
+        <ul style="padding-left:18px;margin:0;">
+          <li style="margin-bottom:6px;">noteで<strong>有料記事・販売記事</strong>を効率よく作成する</li>
+          <li style="margin-bottom:6px;">みっけシリーズなどのアプリを<strong>noteで販売</strong>するための記事を自動生成する</li>
+          <li style="margin-bottom:6px;">Stripeに頼らず<strong>noteのパスワード販売</strong>で手軽に収益化する</li>
+          <li>投稿前の<strong>チェック・スケジュール管理</strong>まで一気通貫でできる</li>
+        </ul>
+      </div>
+
+      <div style="font-weight:700;color:#0f5c3a;font-size:0.92rem;margin-bottom:12px;">📌 各タブの使い方</div>
+
+      <div style="border:1px solid #c3e8d8;border-radius:10px;padding:14px 16px;margin-bottom:12px;">
+        <div style="font-weight:700;color:#1A9E6A;margin-bottom:8px;">💡 ネタ出しタブ</div>
+        <ul style="padding-left:18px;margin:0;">
+          <li style="margin-bottom:5px;">ジャンル・ターゲット・切り口を選ぶだけでタイトル案を<strong>10本自動生成</strong></li>
+          <li style="margin-bottom:5px;">「AI活用」「中小企業経営」など業種別ジャンルに対応</li>
+          <li>生成されたタイトルをそのままコピーして記事作成に活用できる</li>
+        </ul>
+      </div>
+
+      <div style="border:1px solid #c3e8d8;border-radius:10px;padding:14px 16px;margin-bottom:12px;">
+        <div style="font-weight:700;color:#1A9E6A;margin-bottom:8px;">✍️ 記事生成タブ</div>
+        <ul style="padding-left:18px;margin:0;">
+          <li style="margin-bottom:5px;">タイトルとターゲットを入力するだけで<strong>記事本文を自動生成</strong></li>
+          <li style="margin-bottom:5px;">PREP法・PASONA法・ストーリー型・ハウツー型から構成を選べる</li>
+          <li style="margin-bottom:5px;">「有料パートで公開するコンテンツ」を入力すると<strong>有料区切りを自動挿入</strong></li>
+          <li>生成後はそのままnoteに貼り付けてOK</li>
+        </ul>
+      </div>
+
+      <div style="border:1px solid #c3e8d8;border-radius:10px;padding:14px 16px;margin-bottom:12px;">
+        <div style="font-weight:700;color:#1A9E6A;margin-bottom:8px;">🛡️ 投稿チェックタブ</div>
+        <ul style="padding-left:18px;margin:0;">
+          <li style="margin-bottom:5px;">記事本文を貼り付けると<strong>note規約・著作権・誇大表現</strong>をAIがチェック</li>
+          <li style="margin-bottom:5px;">問題があれば箇条書きで指摘、問題なければ「投稿可能」と表示</li>
+          <li>投稿前の最終確認として活用できる</li>
+        </ul>
+      </div>
+
+      <div style="border:2px solid #1A9E6A;border-radius:10px;padding:14px 16px;margin-bottom:12px;background:#e6f7f1;">
+        <div style="font-weight:700;color:#0f5c3a;margin-bottom:8px;">💰 販売記事モードタブ（メイン機能）</div>
+        <ul style="padding-left:18px;margin:0;">
+          <li style="margin-bottom:5px;"><strong>入力は4項目だけ</strong>：アプリ名・ターゲット・解決できる悩み・パスワード</li>
+          <li style="margin-bottom:5px;">価格はワンタッチで選択（¥980〜¥9,800）</li>
+          <li style="margin-bottom:5px;">「無料部分」と「有料部分（パスワード記載）」を<strong>自動で分けて生成</strong></li>
+          <li style="margin-bottom:5px;">生成後は「全文コピー」「無料部分だけ」「有料部分だけ」の3種類でコピー可能</li>
+          <li>noteの編集画面で有料区切り線を入れれば<strong>すぐ販売開始できる</strong></li>
+        </ul>
+      </div>
+
+      <div style="border:1px solid #c3e8d8;border-radius:10px;padding:14px 16px;margin-bottom:20px;">
+        <div style="font-weight:700;color:#1A9E6A;margin-bottom:8px;">📅 スケジュールタブ</div>
+        <ul style="padding-left:18px;margin:0;">
+          <li style="margin-bottom:5px;">記事の投稿予定日・ジャンル・ステータスを一覧で管理できる</li>
+          <li style="margin-bottom:5px;">ステータスは「下書き中 → チェック済み → 投稿済み」で進捗管理</li>
+          <li>データはブラウザに自動保存されるので次回も引き続き使える</li>
+        </ul>
+      </div>
+
+      <div style="background:#0f5c3a;color:white;border-radius:10px;padding:16px 18px;">
+        <div style="font-weight:700;margin-bottom:10px;">🔑 noteパスワード販売の流れ</div>
+        <div style="font-size:0.83rem;line-height:2.2;">
+          ① 販売記事モードでアプリ情報を入力して記事を生成<br>
+          ② noteにコピーして「有料設定の区切り線」を入れる<br>
+          ③ 価格を設定して公開する<br>
+          ④ 購入者が記事内のパスワードをコピー<br>
+          ⑤ みっけシリーズのアプリに入力 → 使い放題 🎉
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
 
 <div class="tab-bar">
   <button class="tab-btn" onclick="switchTab('idea')">💡 ネタ出し</button>
@@ -686,6 +774,21 @@ let selectedPrice = '2,980';
 let scheduleData = JSON.parse(localStorage.getItem('note_schedule') || '[]');
 let generatedFree = '';
 let generatedPaid = '';
+
+function openHelp() {
+  const m = document.getElementById('help-modal');
+  m.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeHelp(e) {
+  if (e.target === document.getElementById('help-modal')) {
+    closeHelpBtn();
+  }
+}
+function closeHelpBtn() {
+  document.getElementById('help-modal').style.display = 'none';
+  document.body.style.overflow = '';
+}
 
 function switchTab(tab) {
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
