@@ -811,7 +811,7 @@
 <div class="copied-toast" id="toast">✅ コピーしました</div>
 
 <script>
-const API_URL = "https://api.anthropic.com/v1/messages";
+const API_URL = "https://digital-ihin-mikke.yymmatsu.workers.dev";
 let selectedGenre = 'AI活用';
 let selectedAngle = '実体験・失敗談ベース';
 let selectedPrice = '2,980';
@@ -872,17 +872,31 @@ document.getElementById('sale-target').addEventListener('change', function() {
 });
 
 async function callClaude(prompt, model = 'claude-sonnet-4-20250514', maxTokens = 1200) {
-  const res = await fetch(API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: model,
-      max_tokens: maxTokens,
-      messages: [{ role: 'user', content: prompt }]
-    })
-  });
-  const data = await res.json();
-  return data.content?.[0]?.text || 'エラーが発生しました';
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: model,
+        max_tokens: maxTokens,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error('APIエラー:', res.status, errText);
+      throw new Error('API_ERROR:' + res.status);
+    }
+    const data = await res.json();
+    if (data.error) {
+      console.error('APIレスポンスエラー:', data.error);
+      throw new Error('RESPONSE_ERROR:' + data.error.message);
+    }
+    return data.content?.[0]?.text || '';
+  } catch(e) {
+    console.error('callClaudeエラー:', e.message);
+    throw e;
+  }
 }
 
 async function generateIdeas() {
@@ -1055,10 +1069,13 @@ ${urls ? 'URL：' + urls : ''}
 各項目3〜4行で簡潔に。すぐ実践できる内容で。`;
 
   try {
-    // 記事生成とアドバイス生成を並列実行
+    // 記事生成とアドバイス生成を並列実行（片方失敗しても継続）
     const [articleResult, adviceResult] = await Promise.all([
       callClaude(articlePrompt, 'claude-sonnet-4-20250514', 1500),
-      callClaude(advicePrompt, 'claude-haiku-4-5-20251001', 800)
+      callClaude(advicePrompt, 'claude-haiku-4-5-20251001', 800).catch(e => {
+        console.warn('アドバイス生成失敗（記事は継続）:', e.message);
+        return '販売戦略アドバイスの生成に失敗しました。記事生成は正常に完了しています。もう一度「生成する」ボタンを押すとアドバイスも取得できます。';
+      })
     ]);
 
     clearInterval(stepTimer);
@@ -1102,7 +1119,19 @@ ${urls ? 'URL：' + urls : ''}
   } catch(e) {
     clearInterval(stepTimer);
     document.getElementById('sale-loading').classList.remove('visible');
-    alert('生成中にエラーが発生しました。もう一度お試しください。');
+    const errMsg = e.message || '';
+    if (errMsg.includes('API_ERROR:429')) {
+      alert('アクセスが集中しています。\n30秒ほど待ってから再度お試しください。');
+    } else if (errMsg.includes('API_ERROR:401')) {
+      alert('認証エラーが発生しました。\nAPIキーの設定を確認してください。');
+    } else if (errMsg.includes('API_ERROR:5')) {
+      alert('サーバーエラーが発生しました。\nしばらく待ってから再度お試しください。');
+    } else if (errMsg.includes('Failed to fetch') || errMsg.includes('network')) {
+      alert('通信エラーが発生しました。\nインターネット接続を確認してください。');
+    } else {
+      alert('生成中にエラーが発生しました。\n詳細：' + errMsg + '\n\nもう一度お試しください。');
+    }
+    console.error('生成エラー詳細:', e);
   }
 }
 
