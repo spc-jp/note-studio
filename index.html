@@ -714,7 +714,7 @@
         <button class="btn btn-copy" onclick="copyFreeOnly()">無料部分だけコピー</button>
         <button class="btn btn-copy" onclick="copyPaidOnly()">有料部分だけコピー</button>
       </div>
-      <p style="font-size:0.75rem;color:var(--gray);margin-top:10px;">※ noteの「ここから有料」設定は、note編集画面で区切り線を挿入してください</p>
+      <p style="font-size:0.75rem;color:var(--gray);margin-top:10px;">※ コピペするだけで見出し・有料区切り線が自動で反映されます（# = 大見出し、## = 中見出し、--- = 有料区切り線）</p>
     </div>
   </div>
 </div>
@@ -886,9 +886,20 @@ async function generateArticle() {
 フレームワーク：${fwMap[fw]}
 ${paid ? '有料パート内容：' + paid : ''}
 
-上記の条件でnote記事の本文を生成してください。
-見出しは「## 」形式で、読みやすく親しみやすい文体で書いてください。
-${paid ? '記事の後半に「---ここから有料---」という区切りを入れて、有料コンテンツを掲載してください。' : ''}`;
+以下のルールを厳守して、note記事の本文を生成してください。
+
+【見出しルール】
+・大見出しは「# 」で始める（例：# はじめに）
+・中見出しは「## 」で始める（例：## 具体的な方法）
+・小見出しは「### 」で始める（例：### ポイント1）
+・このマークダウン記法はnoteにコピペすると自動で見出しに変換されます
+
+【有料区切りルール】
+${paid ? '・有料コンテンツの直前に「---」を単独行で挿入してください（noteで有料区切り線になります）' : ''}
+
+【文体ルール】
+・読みやすく親しみやすいトーンで書いてください
+・絵文字を適度に使ってください`;
 
   const result = await callClaude(prompt);
   document.getElementById('write-loading').classList.remove('visible');
@@ -953,8 +964,10 @@ async function generateSaleArticle() {
 
 【生成ルール】
 1. 無料部分（300〜500字）：共感できる導入、悩みの描写、このアプリで解決できることの概要
-2. 「＝＝＝ここから有料＝＝＝」という区切り文を必ず入れる
-3. 有料部分（200〜300字）：「パスワードは以下です」と書き、下記のパスワードを枠で囲んで大きく表示してから、使い方3ステップを簡潔に書く
+   ・大見出しは「# 」、中見出しは「## 」で始めること（noteにコピペで自動的に見出しになります）
+2. 無料部分の末尾に「＝＝＝ここから有料＝＝＝」という区切り文を必ず入れる
+3. 有料部分の先頭に「---」を単独行で入れる（noteで有料区切り線になります）
+4. 有料部分（200〜300字）：「パスワードは以下です」と書き、下記のパスワードを枠で囲んで大きく表示してから、使い方3ステップを簡潔に書く
 
 【有料部分に必ず含める情報】
 パスワード：${pw}
@@ -994,7 +1007,7 @@ ${urls ? 'アプリURL：\n' + urls : ''}
   document.getElementById('sale-preview').innerHTML = previewHTML;
 
   // プレーンテキスト
-  const rawText = generatedFree + '\n\n【ここから有料】\n' + generatedPaid;
+  const rawText = generatedFree + '\n\n---\n' + generatedPaid;
   document.getElementById('sale-raw').innerText = rawText;
 
   document.getElementById('sale-output').classList.add('visible');
