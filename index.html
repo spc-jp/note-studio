@@ -695,7 +695,11 @@
     <button class="btn btn-primary" onclick="generateSaleArticle()">🚀 note販売記事を生成する</button>
   </div>
 
-  <div class="loading" id="sale-loading"><div class="spinner"></div>販売記事を生成しています...</div>
+  <div class="loading" id="sale-loading">
+    <div class="spinner"></div>
+    <div id="sale-step-msg" style="font-size:0.88rem;color:var(--navy);font-weight:700;margin-top:8px;">準備しています...</div>
+    <div id="sale-step-sub" style="font-size:0.78rem;color:var(--gray);margin-top:4px;">しばらくお待ちください</div>
+  </div>
 
   <div id="sale-output" class="output-area">
     <!-- プレビュー -->
@@ -995,6 +999,24 @@ async function generateSaleArticle() {
   document.getElementById('advice-loading').style.display = 'none';
   document.getElementById('advice-output').style.display = 'none';
 
+  // ステップメッセージ切り替え
+  const steps = [
+    { msg: '📝 タイトルを考えています...', sub: 'キャッチーなタイトルを生成中' },
+    { msg: '✍️ 無料エリアを執筆中...', sub: '読者の心をつかむ冒頭文を作成しています' },
+    { msg: '💰 有料エリアを作成中...', sub: 'パスワードと使い方を整えています' },
+    { msg: '📊 販売戦略を分析中...', sub: 'SNS告知と価格戦略を考えています' },
+    { msg: '🎨 仕上げをしています...', sub: 'もうすぐ完成です' }
+  ];
+  let stepIdx = 0;
+  function updateStep() {
+    const s = steps[stepIdx % steps.length];
+    document.getElementById('sale-step-msg').textContent = s.msg;
+    document.getElementById('sale-step-sub').textContent = s.sub;
+    stepIdx++;
+  }
+  updateStep();
+  const stepTimer = setInterval(updateStep, 3000);
+
   // 記事プロンプト（スリム化）
   const articlePrompt = `noteトップクリエイターの手法で販売記事を生成してください。
 
@@ -1039,6 +1061,7 @@ ${urls ? 'URL：' + urls : ''}
       callClaude(advicePrompt, 'claude-haiku-4-5-20251001', 800)
     ]);
 
+    clearInterval(stepTimer);
     document.getElementById('sale-loading').classList.remove('visible');
 
     // 無料・有料分割
@@ -1077,6 +1100,7 @@ ${urls ? 'URL：' + urls : ''}
     document.getElementById('advice-output').style.display = 'block';
 
   } catch(e) {
+    clearInterval(stepTimer);
     document.getElementById('sale-loading').classList.remove('visible');
     alert('生成中にエラーが発生しました。もう一度お試しください。');
   }
