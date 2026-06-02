@@ -482,7 +482,6 @@
   <button class="tab-btn" onclick="switchTab('write')">✍️ 記事生成</button>
   <button class="tab-btn" onclick="switchTab('check')">🛡️ 投稿チェック</button>
   <button class="tab-btn sale-tab" onclick="switchTab('sale')">💰 販売記事モード</button>
-  <button class="tab-btn" onclick="switchTab('sns')">📣 SNS告知生成</button>
   <button class="tab-btn" onclick="switchTab('schedule')">📅 スケジュール</button>
 </div>
 
@@ -608,12 +607,12 @@
 <div id="tab-sale" class="tab-content">
   <div class="sale-hero">
     <div class="badge-new">NEW</div>
-    <h2>💰 note販売専用モード</h2>
-    <p>みっけシリーズのアプリをnoteで売るための記事を、入力4項目だけで自動生成します。<br>「ここから有料」の区切りとパスワードを自動挿入します。</p>
+    <h2>💰 note販売記事 ＋ SNS告知 一括生成モード</h2>
+    <p>入力は1回だけ。販売記事とX・Threads・Facebook告知文を同時に生成します。<br>「ここから有料」の区切りとパスワードも自動挿入。</p>
   </div>
 
   <div class="tip-box">
-    💡 Stripeの決済登録不要。noteで購入 → 記事内のパスワードを入力 → アプリ使い放題の導線が作れます。
+    💡 入力1回 → 販売記事＋SNS告知を一括生成。Stripeの決済登録不要。noteで購入 → パスワード入力 → アプリ使い放題の導線が作れます。
   </div>
 
   <div class="section-card">
@@ -693,7 +692,7 @@
       <input type="text" id="sale-profile" value="YoshiBon（Smile Plus Consulting代表・Webマーケター歴20年以上・AI活用アプリ60本以上開発）" placeholder="例：YoshiBon・AI活用アプリ60本以上開発">
     </div>
 
-    <button class="btn btn-primary" onclick="generateSaleArticle()">🚀 note販売記事を生成する</button>
+    <button class="btn btn-primary" onclick="generateSaleArticle()">🚀 販売記事＋SNS告知を一括生成する</button>
   </div>
 
   <div class="loading" id="sale-loading">
@@ -761,132 +760,75 @@
       </div>
     </div>
 
-    <!-- 販売記事からSNS告知連動ボタン -->
-    <div id="sns-link-btn" style="display:none;margin-top:8px;">
-      <button class="btn btn-primary" onclick="goToSnsFromSale()" style="background:#0f5c3a;">
-        📣 この内容でSNS告知文も生成する
-      </button>
+    <!-- SNS告知出力エリア（A案：縦並び） -->
+    <div id="sale-sns-loading" style="display:none;text-align:center;padding:24px;color:var(--gray);">
+      <div class="spinner"></div>
+      <p style="margin-top:8px;font-size:0.85rem;" id="sale-sns-step">📱 SNS告知文を生成中...</p>
     </div>
 
-  </div>
-</div>
-
-<!-- SNS告知生成 -->
-<div id="tab-sns" class="tab-content">
-  <div style="background:linear-gradient(135deg,#0f5c3a,#1A9E6A);color:white;border-radius:12px;padding:24px;margin-bottom:24px;position:relative;overflow:hidden;">
-    <div style="position:absolute;right:20px;top:50%;transform:translateY(-50%);font-size:4rem;opacity:0.15;">📣</div>
-    <div style="display:inline-block;background:rgba(255,255,255,0.2);font-size:0.65rem;font-weight:700;padding:2px 8px;border-radius:20px;margin-bottom:8px;">SNS告知生成</div>
-    <h2 style="font-size:1.2rem;font-weight:700;margin-bottom:8px;">X・Threads・Facebook 告知文を一括生成</h2>
-    <p style="font-size:0.85rem;opacity:0.85;line-height:1.6;">アプリ情報を入力するだけでX3回・Threads2セット・Facebook1本を自動生成。各投稿にコピーボタン付き。</p>
-  </div>
-
-  <div class="section-card">
-    <h3>📋 アプリ情報を入力</h3>
-    <div class="field-group">
-      <label>アプリ名・記事タイトル</label>
-      <input type="text" id="sns-appname" placeholder="例：デジタル遺品みっけ">
-    </div>
-    <div class="row2">
-      <div class="field-group">
-        <label>ターゲット</label>
-        <input type="text" id="sns-target" placeholder="例：税理士・士業の先生方">
+    <div id="sale-sns-output" style="display:none;margin-top:8px;">
+      <div style="background:linear-gradient(135deg,#0f5c3a,#1A9E6A);border-radius:12px;padding:4px;">
+        <div style="background:white;border-radius:10px;overflow:hidden;">
+          <div style="background:linear-gradient(135deg,#0f5c3a,#1A9E6A);padding:14px 18px;display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div style="color:white;font-weight:700;font-size:0.95rem;">📣 SNS告知文</div>
+              <div style="color:rgba(255,255,255,0.8);font-size:0.75rem;margin-top:2px;">X・Threads・Facebook 一括生成</div>
+            </div>
+            <button class="btn btn-copy btn-sm" onclick="copyAllSnsFromSale()" style="color:white;background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.4);">📋 全部まとめてコピー</button>
+          </div>
+          <div style="padding:20px;">
+            <div style="margin-bottom:20px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                <div style="font-size:0.88rem;font-weight:700;color:#0f5c3a;">𝕏 X（旧Twitter）3回投稿</div>
+                <button class="btn btn-copy btn-sm" onclick="copySaleX()">X 3投稿まとめてコピー</button>
+              </div>
+              <div style="font-size:0.75rem;color:var(--gray);margin-bottom:4px;">📅 月曜朝8:00 ／ 問題提起型</div>
+              <div id="sale-x1" class="copy-output-area" style="min-height:auto;max-height:180px;margin-bottom:6px;"></div>
+              <button class="btn btn-copy btn-sm" onclick="copySnsEl('sale-x1')">📋 コピー</button>
+              <div style="font-size:0.75rem;color:var(--gray);margin:10px 0 4px;">📅 水曜夜20:00 ／ チェックリスト型</div>
+              <div id="sale-x2" class="copy-output-area" style="min-height:auto;max-height:180px;margin-bottom:6px;"></div>
+              <button class="btn btn-copy btn-sm" onclick="copySnsEl('sale-x2')">📋 コピー</button>
+              <div style="font-size:0.75rem;color:var(--gray);margin:10px 0 4px;">📅 金曜夜21:00 ／ 販売CTA型</div>
+              <div id="sale-x3" class="copy-output-area" style="min-height:auto;max-height:180px;margin-bottom:6px;"></div>
+              <button class="btn btn-copy btn-sm" onclick="copySnsEl('sale-x3')">📋 コピー</button>
+            </div>
+            <div style="margin-bottom:20px;border-top:1px solid var(--border);padding-top:16px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                <div style="font-size:0.88rem;font-weight:700;color:#0f5c3a;">🧵 Threads 3段階投稿×2セット</div>
+                <button class="btn btn-copy btn-sm" onclick="copySaleThreads()">Threads全まとめコピー</button>
+              </div>
+              <div style="font-size:0.82rem;font-weight:700;color:#0f5c3a;margin-bottom:8px;">セットA（火曜 ／ 感情・共感型）</div>
+              <div style="font-size:0.75rem;color:var(--gray);margin-bottom:4px;">1投稿目 ／ フック（共感）</div>
+              <div id="sale-tha1" class="copy-output-area" style="min-height:auto;max-height:160px;margin-bottom:6px;"></div>
+              <button class="btn btn-copy btn-sm" onclick="copySnsEl('sale-tha1')">📋 コピー</button>
+              <div style="font-size:0.75rem;color:var(--gray);margin:10px 0 4px;">2投稿目 ／ 本題（解決策）</div>
+              <div id="sale-tha2" class="copy-output-area" style="min-height:auto;max-height:160px;margin-bottom:6px;"></div>
+              <button class="btn btn-copy btn-sm" onclick="copySnsEl('sale-tha2')">📋 コピー</button>
+              <div style="font-size:0.75rem;color:var(--gray);margin:10px 0 4px;">3投稿目 ／ CTA（行動）</div>
+              <div id="sale-tha3" class="copy-output-area" style="min-height:auto;max-height:160px;margin-bottom:6px;"></div>
+              <button class="btn btn-copy btn-sm" onclick="copySnsEl('sale-tha3')">📋 コピー</button>
+              <div style="font-size:0.82rem;font-weight:700;color:#0f5c3a;margin:14px 0 8px;">セットB（木曜 ／ 気づき・ノウハウ型）</div>
+              <div style="font-size:0.75rem;color:var(--gray);margin-bottom:4px;">1投稿目 ／ フック（問いかけ）</div>
+              <div id="sale-thb1" class="copy-output-area" style="min-height:auto;max-height:160px;margin-bottom:6px;"></div>
+              <button class="btn btn-copy btn-sm" onclick="copySnsEl('sale-thb1')">📋 コピー</button>
+              <div style="font-size:0.75rem;color:var(--gray);margin:10px 0 4px;">2投稿目 ／ 本題（気づき）</div>
+              <div id="sale-thb2" class="copy-output-area" style="min-height:auto;max-height:160px;margin-bottom:6px;"></div>
+              <button class="btn btn-copy btn-sm" onclick="copySnsEl('sale-thb2')">📋 コピー</button>
+              <div style="font-size:0.75rem;color:var(--gray);margin:10px 0 4px;">3投稿目 ／ CTA（行動）</div>
+              <div id="sale-thb3" class="copy-output-area" style="min-height:auto;max-height:160px;margin-bottom:6px;"></div>
+              <button class="btn btn-copy btn-sm" onclick="copySnsEl('sale-thb3')">📋 コピー</button>
+            </div>
+            <div style="border-top:1px solid var(--border);padding-top:16px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                <div style="font-size:0.88rem;font-weight:700;color:#0f5c3a;">👥 Facebook 月曜朝投稿</div>
+                <button class="btn btn-copy btn-sm" onclick="copySnsEl('sale-fb')">📋 コピー</button>
+              </div>
+              <div style="font-size:0.75rem;color:var(--gray);margin-bottom:4px;">📅 月曜朝8:30 ／ ストーリー・信頼型</div>
+              <div id="sale-fb" class="copy-output-area" style="min-height:auto;max-height:260px;margin-bottom:6px;"></div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="field-group">
-        <label>販売価格</label>
-        <input type="text" id="sns-price" placeholder="例：2,980">
-      </div>
-    </div>
-    <div class="field-group">
-      <label>解決できる悩み・アプリの特徴</label>
-      <textarea id="sns-value" placeholder="例：デジタル終活をAIが一緒に整理。パスワードひとつで今日から使い放題。"></textarea>
-    </div>
-    <button class="btn btn-primary" style="background:#0f5c3a;" onclick="generateSnsAll()">📣 SNS告知文を一括生成する</button>
-  </div>
-
-  <div class="loading" id="sns-loading">
-    <div class="spinner"></div>
-    <div id="sns-step-msg" style="font-size:0.88rem;color:var(--navy);font-weight:700;margin-top:8px;">準備しています...</div>
-    <div id="sns-step-sub" style="font-size:0.78rem;color:var(--gray);margin-top:4px;">しばらくお待ちください</div>
-  </div>
-
-  <div id="sns-output" class="output-area">
-
-    <!-- 全部まとめてコピー -->
-    <div style="margin-bottom:16px;">
-      <button class="btn btn-primary" style="background:#0f5c3a;" onclick="copyAllSns()">📋 全SNS投稿をまとめてコピー</button>
-    </div>
-
-    <!-- X -->
-    <div class="section-card" style="border-left:4px solid #1A9E6A;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-        <h3 style="border:none;padding:0;margin:0;">𝕏 X（旧Twitter）3回投稿</h3>
-        <button class="btn btn-copy btn-sm" onclick="copyPlatform('x')">X 3投稿まとめてコピー</button>
-      </div>
-      <div class="field-group">
-        <div style="font-size:0.78rem;color:var(--gray);margin-bottom:6px;">📅 月曜朝8:00 ／ 問題提起型</div>
-        <div id="x-post-1" class="copy-output-area" style="min-height:auto;max-height:200px;"></div>
-        <button class="btn btn-copy btn-sm" style="margin-top:6px;" onclick="copySingle('x-post-1')">📋 コピー</button>
-      </div>
-      <div class="field-group">
-        <div style="font-size:0.78rem;color:var(--gray);margin-bottom:6px;">📅 水曜夜20:00 ／ チェックリスト型</div>
-        <div id="x-post-2" class="copy-output-area" style="min-height:auto;max-height:200px;"></div>
-        <button class="btn btn-copy btn-sm" style="margin-top:6px;" onclick="copySingle('x-post-2')">📋 コピー</button>
-      </div>
-      <div class="field-group">
-        <div style="font-size:0.78rem;color:var(--gray);margin-bottom:6px;">📅 金曜夜21:00 ／ 販売CTA型</div>
-        <div id="x-post-3" class="copy-output-area" style="min-height:auto;max-height:200px;"></div>
-        <button class="btn btn-copy btn-sm" style="margin-top:6px;" onclick="copySingle('x-post-3')">📋 コピー</button>
-      </div>
-    </div>
-
-    <!-- Threads -->
-    <div class="section-card" style="border-left:4px solid #0f5c3a;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-        <h3 style="border:none;padding:0;margin:0;">🧵 Threads 3段階投稿×2セット</h3>
-        <button class="btn btn-copy btn-sm" onclick="copyPlatform('threads')">Threads全まとめコピー</button>
-      </div>
-      <div style="font-size:0.85rem;font-weight:700;color:#0f5c3a;margin-bottom:12px;">セットA（火曜投稿 ／ 感情・共感型）</div>
-      <div class="field-group">
-        <div style="font-size:0.78rem;color:var(--gray);margin-bottom:6px;">1投稿目 ／ フック（共感）</div>
-        <div id="th-a1" class="copy-output-area" style="min-height:auto;max-height:200px;"></div>
-        <button class="btn btn-copy btn-sm" style="margin-top:6px;" onclick="copySingle('th-a1')">📋 コピー</button>
-      </div>
-      <div class="field-group">
-        <div style="font-size:0.78rem;color:var(--gray);margin-bottom:6px;">2投稿目 ／ 本題（解決策）</div>
-        <div id="th-a2" class="copy-output-area" style="min-height:auto;max-height:200px;"></div>
-        <button class="btn btn-copy btn-sm" style="margin-top:6px;" onclick="copySingle('th-a2')">📋 コピー</button>
-      </div>
-      <div class="field-group">
-        <div style="font-size:0.78rem;color:var(--gray);margin-bottom:6px;">3投稿目 ／ CTA（行動）</div>
-        <div id="th-a3" class="copy-output-area" style="min-height:auto;max-height:200px;"></div>
-        <button class="btn btn-copy btn-sm" style="margin-top:6px;" onclick="copySingle('th-a3')">📋 コピー</button>
-      </div>
-      <div style="font-size:0.85rem;font-weight:700;color:#0f5c3a;margin:16px 0 12px;">セットB（木曜投稿 ／ 気づき・ノウハウ型）</div>
-      <div class="field-group">
-        <div style="font-size:0.78rem;color:var(--gray);margin-bottom:6px;">1投稿目 ／ フック（問いかけ）</div>
-        <div id="th-b1" class="copy-output-area" style="min-height:auto;max-height:200px;"></div>
-        <button class="btn btn-copy btn-sm" style="margin-top:6px;" onclick="copySingle('th-b1')">📋 コピー</button>
-      </div>
-      <div class="field-group">
-        <div style="font-size:0.78rem;color:var(--gray);margin-bottom:6px;">2投稿目 ／ 本題（気づき）</div>
-        <div id="th-b2" class="copy-output-area" style="min-height:auto;max-height:200px;"></div>
-        <button class="btn btn-copy btn-sm" style="margin-top:6px;" onclick="copySingle('th-b2')">📋 コピー</button>
-      </div>
-      <div class="field-group">
-        <div style="font-size:0.78rem;color:var(--gray);margin-bottom:6px;">3投稿目 ／ CTA（行動）</div>
-        <div id="th-b3" class="copy-output-area" style="min-height:auto;max-height:200px;"></div>
-        <button class="btn btn-copy btn-sm" style="margin-top:6px;" onclick="copySingle('th-b3')">📋 コピー</button>
-      </div>
-    </div>
-
-    <!-- Facebook -->
-    <div class="section-card" style="border-left:4px solid #223670;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-        <h3 style="border:none;padding:0;margin:0;">👥 Facebook 月曜朝投稿</h3>
-        <button class="btn btn-copy btn-sm" onclick="copySingle('fb-post')">📋 コピー</button>
-      </div>
-      <div style="font-size:0.78rem;color:var(--gray);margin-bottom:6px;">📅 月曜朝8:30 ／ ストーリー・信頼型</div>
-      <div id="fb-post" class="copy-output-area" style="min-height:auto;max-height:300px;"></div>
     </div>
 
   </div>
@@ -1147,7 +1089,8 @@ async function generateSaleArticle() {
     { msg: '📝 タイトルを考えています...', sub: 'キャッチーなタイトルを生成中' },
     { msg: '✍️ 無料エリアを執筆中...', sub: '読者の心をつかむ冒頭文を作成しています' },
     { msg: '💰 有料エリアを作成中...', sub: 'パスワードと使い方を整えています' },
-    { msg: '📊 販売戦略を分析中...', sub: 'SNS告知と価格戦略を考えています' },
+    { msg: '📱 SNS告知文を作成中...', sub: 'X・Threads・Facebookの投稿を生成しています' },
+    { msg: '📊 販売戦略を分析中...', sub: '価格戦略とSEO対策を考えています' },
     { msg: '🎨 仕上げをしています...', sub: 'もうすぐ完成です' }
   ];
   let stepIdx = 0;
@@ -1245,11 +1188,41 @@ ${urls ? 'URL：' + urls : ''}
 
   try {
     // 記事生成とアドバイス生成を並列実行（片方失敗しても継続）
-    const [articleResult, adviceResult] = await Promise.all([
+    const snsPromptForSale = `SNSマーケティング専門家として以下の情報で告知文を生成してください。
+アプリ名：${appname}／ターゲット：${target}／価格：¥${price}／特徴：${value}
+
+===X1===
+（月曜朝8:00・問題提起型・140字以内）
+===X2===
+（水曜夜20:00・チェックリスト型・140字以内）
+===X3===
+（金曜夜21:00・販売CTA型・140字以内・ハッシュタグ3つ）
+===THA1===
+（火曜セットA・1投稿目・フック共感型・150字以内）
+===THA2===
+（火曜セットA・2投稿目・解決策本題・150字以内）
+===THA3===
+（火曜セットA・3投稿目・CTA・150字以内）
+===THB1===
+（木曜セットB・1投稿目・フック問いかけ型・150字以内）
+===THB2===
+（木曜セットB・2投稿目・気づきノウハウ・150字以内）
+===THB3===
+（木曜セットB・3投稿目・CTA・150字以内）
+===FB===
+（月曜朝8:30・ストーリー信頼型・400字・「おはようございます」で始める）
+
+絵文字を適度に使い親しみやすいトーンで。`;
+
+    const [articleResult, adviceResult, snsResult] = await Promise.all([
       callClaude(articlePrompt, 'claude-sonnet-4-20250514', 2500),
       callClaude(advicePrompt, 'claude-haiku-4-5-20251001', 800).catch(e => {
-        console.warn('アドバイス生成失敗（記事は継続）:', e.message);
-        return '販売戦略アドバイスの生成に失敗しました。記事生成は正常に完了しています。もう一度「生成する」ボタンを押すとアドバイスも取得できます。';
+        console.warn('アドバイス生成失敗:', e.message);
+        return '販売戦略アドバイスの生成に失敗しました。もう一度お試しください。';
+      }),
+      callClaude(snsPromptForSale, 'claude-haiku-4-5-20251001', 2000).catch(e => {
+        console.warn('SNS生成失敗:', e.message);
+        return '';
       })
     ]);
 
@@ -1292,6 +1265,40 @@ ${urls ? 'URL：' + urls : ''}
     document.getElementById('advice-text').innerText = adviceResult;
     document.getElementById('advice-output').style.display = 'block';
 
+    // SNS告知を表示
+    if (snsResult) {
+      const parseS = (marker) => {
+        const markers = ['===X1===','===X2===','===X3===','===THA1===','===THA2===','===THA3===','===THB1===','===THB2===','===THB3===','===FB==='];
+        const start = snsResult.indexOf(marker);
+        if (start === -1) return '';
+        const afterMarker = snsResult.indexOf('\n', start) + 1;
+        let end = snsResult.length;
+        for (const m of markers) {
+          if (m === marker) continue;
+          const pos = snsResult.indexOf(m, afterMarker);
+          if (pos !== -1 && pos < end) end = pos;
+        }
+        return snsResult.slice(afterMarker, end).trim();
+      };
+      saleSnsData = {
+        x1: parseS('===X1==='), x2: parseS('===X2==='), x3: parseS('===X3==='),
+        tha1: parseS('===THA1==='), tha2: parseS('===THA2==='), tha3: parseS('===THA3==='),
+        thb1: parseS('===THB1==='), thb2: parseS('===THB2==='), thb3: parseS('===THB3==='),
+        fb: parseS('===FB===')
+      };
+      document.getElementById('sale-x1').innerText = saleSnsData.x1;
+      document.getElementById('sale-x2').innerText = saleSnsData.x2;
+      document.getElementById('sale-x3').innerText = saleSnsData.x3;
+      document.getElementById('sale-tha1').innerText = saleSnsData.tha1;
+      document.getElementById('sale-tha2').innerText = saleSnsData.tha2;
+      document.getElementById('sale-tha3').innerText = saleSnsData.tha3;
+      document.getElementById('sale-thb1').innerText = saleSnsData.thb1;
+      document.getElementById('sale-thb2').innerText = saleSnsData.thb2;
+      document.getElementById('sale-thb3').innerText = saleSnsData.thb3;
+      document.getElementById('sale-fb').innerText = saleSnsData.fb;
+      document.getElementById('sale-sns-output').style.display = 'block';
+    }
+
   } catch(e) {
     clearInterval(stepTimer);
     document.getElementById('sale-loading').classList.remove('visible');
@@ -1324,25 +1331,7 @@ function copyRawText() {
 }
 // SNS告知生成関連
 let snsData = {};
-
-function goToSnsFromSale() {
-  const appname = document.getElementById('sale-appname').value;
-  const targetEl = document.getElementById('sale-target');
-  const target = targetEl.value === 'その他（自由入力）'
-    ? document.getElementById('sale-target-custom').value
-    : targetEl.value;
-  const price = document.getElementById('sale-price').value;
-  const value = document.getElementById('sale-value').value;
-  document.getElementById('sns-appname').value = appname;
-  document.getElementById('sns-target').value = target;
-  document.getElementById('sns-price').value = price;
-  document.getElementById('sns-value').value = value;
-  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('tab-sns').classList.add('active');
-  document.querySelectorAll('.tab-btn')[4].classList.add('active');
-  window.scrollTo(0, 0);
-}
+let saleSnsData = {};
 
 async function generateSnsAll() {
   const appname = document.getElementById('sns-appname').value;
@@ -1495,6 +1484,25 @@ function copyAllSns() {
   navigator.clipboard.writeText(all).then(() => showToast('全SNS投稿をコピーしました'));
 }
 
+function copySnsEl(id) {
+  navigator.clipboard.writeText(document.getElementById(id).innerText).then(() => showToast('コピーしました'));
+}
+function copySaleX() {
+  const t = ['【X 1回目 月曜朝8:00】\n'+saleSnsData.x1,'【X 2回目 水曜夜20:00】\n'+saleSnsData.x2,'【X 3回目 金曜夜21:00】\n'+saleSnsData.x3].join('\n\n---\n\n');
+  navigator.clipboard.writeText(t).then(() => showToast('X 3投稿まとめてコピーしました'));
+}
+function copySaleThreads() {
+  const t = ['【Threads セットA 火曜】\n1投稿目：\n'+saleSnsData.tha1+'\n\n2投稿目：\n'+saleSnsData.tha2+'\n\n3投稿目：\n'+saleSnsData.tha3,
+             '【Threads セットB 木曜】\n1投稿目：\n'+saleSnsData.thb1+'\n\n2投稿目：\n'+saleSnsData.thb2+'\n\n3投稿目：\n'+saleSnsData.thb3].join('\n\n---\n\n');
+  navigator.clipboard.writeText(t).then(() => showToast('Threadsまとめてコピーしました'));
+}
+function copyAllSnsFromSale() {
+  const all = ['【X 1回目】\n'+saleSnsData.x1,'【X 2回目】\n'+saleSnsData.x2,'【X 3回目】\n'+saleSnsData.x3,
+               '【Threads A-1】\n'+saleSnsData.tha1,'【Threads A-2】\n'+saleSnsData.tha2,'【Threads A-3】\n'+saleSnsData.tha3,
+               '【Threads B-1】\n'+saleSnsData.thb1,'【Threads B-2】\n'+saleSnsData.thb2,'【Threads B-3】\n'+saleSnsData.thb3,
+               '【Facebook】\n'+saleSnsData.fb].join('\n\n---\n\n');
+  navigator.clipboard.writeText(all).then(() => showToast('全SNS投稿をコピーしました'));
+}
 function copyAdvice() {
   const text = document.getElementById('advice-text').innerText;
   navigator.clipboard.writeText(text).then(() => showToast('販売戦略をコピーしました'));
