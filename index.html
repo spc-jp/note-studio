@@ -481,7 +481,7 @@
   <button class="tab-btn" onclick="switchTab('idea')">💡 ネタ出し</button>
   <button class="tab-btn" onclick="switchTab('write')">✍️ 記事生成</button>
   <button class="tab-btn" onclick="switchTab('check')">🛡️ 投稿チェック</button>
-  <button class="tab-btn sale-tab" onclick="switchTab('sale')">💰 販売記事モード</button>
+  <button class="tab-btn sale-tab active" onclick="switchTab('sale')">💰 販売記事モード</button>
   <button class="tab-btn" onclick="switchTab('schedule')">📅 スケジュール</button>
 </div>
 
@@ -604,7 +604,7 @@
 </div>
 
 <!-- ★ 販売記事モード（新規） -->
-<div id="tab-sale" class="tab-content">
+<div id="tab-sale" class="tab-content active">
   <div class="sale-hero">
     <div class="badge-new">NEW</div>
     <h2>💰 note販売記事 ＋ SNS告知 一括生成モード</h2>
@@ -1188,31 +1188,47 @@ ${urls ? 'URL：' + urls : ''}
 
   try {
     // 記事生成とアドバイス生成を並列実行（片方失敗しても継続）
-    const snsPromptForSale = `SNSマーケティング専門家として以下の情報で告知文を生成してください。
-アプリ名：${appname}／ターゲット：${target}／価格：¥${price}／特徴：${value}
+    const snsPromptForSale = `あなたはSNSマーケティングの専門家です。
+以下の情報でSNS投稿文を10本生成してください。
+
+アプリ名：${appname}
+ターゲット：${target}
+価格：¥${price}
+特徴：${value}
+
+【重要】必ず以下のマーカーを使って出力してください。マーカーは必ず単独行に記載すること。
 
 ===X1===
-（月曜朝8:00・問題提起型・140字以内）
-===X2===
-（水曜夜20:00・チェックリスト型・140字以内）
-===X3===
-（金曜夜21:00・販売CTA型・140字以内・ハッシュタグ3つ）
-===THA1===
-（火曜セットA・1投稿目・フック共感型・150字以内）
-===THA2===
-（火曜セットA・2投稿目・解決策本題・150字以内）
-===THA3===
-（火曜セットA・3投稿目・CTA・150字以内）
-===THB1===
-（木曜セットB・1投稿目・フック問いかけ型・150字以内）
-===THB2===
-（木曜セットB・2投稿目・気づきノウハウ・150字以内）
-===THB3===
-（木曜セットB・3投稿目・CTA・150字以内）
-===FB===
-（月曜朝8:30・ストーリー信頼型・400字・「おはようございます」で始める）
+月曜朝8時投稿。問題提起型。140字以内。絵文字あり。
 
-絵文字を適度に使い親しみやすいトーンで。`;
+===X2===
+水曜夜20時投稿。チェックリスト型（✅を使う）。140字以内。
+
+===X3===
+金曜夜21時投稿。販売CTA型。140字以内。ハッシュタグ3つ。
+
+===THA1===
+火曜セットA・1投稿目。共感フック型。150字以内。
+
+===THA2===
+火曜セットA・2投稿目。解決策を提示。150字以内。
+
+===THA3===
+火曜セットA・3投稿目。購入CTAで締める。150字以内。
+
+===THB1===
+木曜セットB・1投稿目。問いかけフック型。150字以内。
+
+===THB2===
+木曜セットB・2投稿目。気づき・ノウハウ。150字以内。
+
+===THB3===
+木曜セットB・3投稿目。購入CTAで締める。150字以内。
+
+===FB===
+月曜朝8時30分投稿。「おはようございます」で始める。ストーリー信頼型。400字程度。絵文字あり。
+
+各投稿は親しみやすいトーンで書いてください。`;
 
     const [articleResult, adviceResult, snsResult] = await Promise.all([
       callClaude(articlePrompt, 'claude-sonnet-4-20250514', 2500),
@@ -1220,7 +1236,7 @@ ${urls ? 'URL：' + urls : ''}
         console.warn('アドバイス生成失敗:', e.message);
         return '販売戦略アドバイスの生成に失敗しました。もう一度お試しください。';
       }),
-      callClaude(snsPromptForSale, 'claude-haiku-4-5-20251001', 2000).catch(e => {
+      callClaude(snsPromptForSale, 'claude-sonnet-4-20250514', 3000).catch(e => {
         console.warn('SNS生成失敗:', e.message);
         return '';
       })
@@ -1266,7 +1282,8 @@ ${urls ? 'URL：' + urls : ''}
     document.getElementById('advice-output').style.display = 'block';
 
     // SNS告知を表示
-    if (snsResult) {
+    console.log('SNS生成結果:', snsResult ? snsResult.substring(0, 200) : '空');
+    if (snsResult && snsResult.length > 50) {
       const parseS = (marker) => {
         const markers = ['===X1===','===X2===','===X3===','===THA1===','===THA2===','===THA3===','===THB1===','===THB2===','===THB3===','===FB==='];
         const start = snsResult.indexOf(marker);
@@ -1296,6 +1313,12 @@ ${urls ? 'URL：' + urls : ''}
       document.getElementById('sale-thb2').innerText = saleSnsData.thb2;
       document.getElementById('sale-thb3').innerText = saleSnsData.thb3;
       document.getElementById('sale-fb').innerText = saleSnsData.fb;
+      document.getElementById('sale-sns-output').style.display = 'block';
+      console.log('SNS表示完了:', saleSnsData);
+    } else {
+      // SNS生成失敗時のフォールバック表示
+      console.warn('SNS結果が空または短すぎます。長さ:', snsResult ? snsResult.length : 0);
+      document.getElementById('sale-x1').innerText = 'SNS告知の生成に失敗しました。もう一度「一括生成する」ボタンを押してください。';
       document.getElementById('sale-sns-output').style.display = 'block';
     }
 
@@ -1488,6 +1511,7 @@ function copySnsEl(id) {
   navigator.clipboard.writeText(document.getElementById(id).innerText).then(() => showToast('コピーしました'));
 }
 function copySaleX() {
+  if (!saleSnsData.x1) { showToast('先に生成してください'); return; }
   const t = ['【X 1回目 月曜朝8:00】\n'+saleSnsData.x1,'【X 2回目 水曜夜20:00】\n'+saleSnsData.x2,'【X 3回目 金曜夜21:00】\n'+saleSnsData.x3].join('\n\n---\n\n');
   navigator.clipboard.writeText(t).then(() => showToast('X 3投稿まとめてコピーしました'));
 }
@@ -1497,6 +1521,7 @@ function copySaleThreads() {
   navigator.clipboard.writeText(t).then(() => showToast('Threadsまとめてコピーしました'));
 }
 function copyAllSnsFromSale() {
+  if (!saleSnsData.x1) { showToast('先に生成してください'); return; }
   const all = ['【X 1回目】\n'+saleSnsData.x1,'【X 2回目】\n'+saleSnsData.x2,'【X 3回目】\n'+saleSnsData.x3,
                '【Threads A-1】\n'+saleSnsData.tha1,'【Threads A-2】\n'+saleSnsData.tha2,'【Threads A-3】\n'+saleSnsData.tha3,
                '【Threads B-1】\n'+saleSnsData.thb1,'【Threads B-2】\n'+saleSnsData.thb2,'【Threads B-3】\n'+saleSnsData.thb3,
