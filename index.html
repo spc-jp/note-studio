@@ -483,6 +483,9 @@
   <button class="tab-btn" onclick="switchTab('check')">🛡️ 投稿チェック</button>
   <button class="tab-btn sale-tab active" onclick="switchTab('sale')">💰 販売記事モード</button>
   <button class="tab-btn" onclick="switchTab('schedule')">📅 スケジュール</button>
+  <button class="tab-btn" onclick="switchTab('rewrite')">✏️ 冒頭リライト</button>
+  <button class="tab-btn" onclick="switchTab('follow')">📣 フォロー導線</button>
+  <button class="tab-btn" onclick="switchTab('related')">🔗 連携記事案</button>
 </div>
 
 <!-- ネタ出し -->
@@ -611,9 +614,6 @@
     <p>入力は1回だけ。販売記事とX・Threads・Facebook告知文を同時に生成します。<br>「ここから有料」の区切りとパスワードも自動挿入。</p>
   </div>
 
-  <div class="tip-box">
-    💡 入力1回 → 販売記事＋SNS告知を一括生成。Stripeの決済登録不要。noteで購入 → パスワード入力 → アプリ使い放題の導線が作れます。
-  </div>
 
   <div class="section-card">
     <h3>📋 アプリ情報を入力してください</h3>
@@ -875,6 +875,159 @@
         <thead><tr><th>予定日</th><th>タイトル</th><th>ジャンル</th><th>ステータス</th><th>操作</th></tr></thead>
         <tbody id="schedule-body"></tbody>
       </table>
+    </div>
+  </div>
+</div>
+
+<!-- ✏️ 冒頭リライト -->
+<div id="tab-rewrite" class="tab-content">
+  <div class="tip-box">
+    💡 生成した記事の冒頭3行を「人間らしい語り口」に書き直します。離脱率を下げる最も効果的な施策です。
+  </div>
+  <div class="section-card">
+    <h3>✏️ 冒頭リライト</h3>
+    <p style="font-size:0.82rem;color:var(--gray);margin-bottom:16px;">記事の冒頭文を貼り付けると、読者が離脱しない「つかみ」に書き直します</p>
+    <div class="field-group">
+      <label>ターゲット読者</label>
+      <input type="text" id="rw-target" placeholder="例：50代の中小企業経営者">
+    </div>
+    <div class="field-group">
+      <label>記事のテーマ・タイトル</label>
+      <input type="text" id="rw-theme" placeholder="例：AIで業務を3時間短縮した話">
+    </div>
+    <div class="field-group">
+      <label>現在の冒頭文（貼り付けてください）</label>
+      <textarea id="rw-text" style="min-height:140px;" placeholder="生成した記事の冒頭3〜5行を貼り付けてください"></textarea>
+    </div>
+    <div class="field-group">
+      <label>書き直しスタイル</label>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;" id="rw-style-btns">
+        <button class="filter-btn active" onclick="selectRwStyle(this,'実話・体験談風')">📖 実話・体験談風</button>
+        <button class="filter-btn" onclick="selectRwStyle(this,'問いかけ・共感風')">🤔 問いかけ・共感風</button>
+        <button class="filter-btn" onclick="selectRwStyle(this,'驚き・数字インパクト風')">⚡ 驚き・数字インパクト風</button>
+        <button class="filter-btn" onclick="selectRwStyle(this,'やさしい語りかけ風')">😊 やさしい語りかけ風</button>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="generateRewrite()">✨ 冒頭を書き直す（3パターン）</button>
+  </div>
+  <div class="loading" id="rw-loading"><div class="spinner"></div><div style="margin-top:8px;font-size:0.88rem;color:var(--navy);font-weight:700;">冒頭を3パターン書き直しています...</div></div>
+  <div id="rw-output" class="output-area">
+    <div class="section-card">
+      <h3>📝 リライト結果（3パターン）</h3>
+      <p style="font-size:0.8rem;color:var(--gray);margin-bottom:14px;">一番しっくりくるパターンをnote記事の冒頭に差し替えてください😊</p>
+      <div id="rw-pat1" class="copy-output-area" style="border-left:4px solid #1A9E6A;"></div>
+      <div style="display:flex;gap:8px;margin-bottom:14px;">
+        <button class="btn btn-copy btn-sm" onclick="copyText('rw-pat1')">📋 パターン1コピー</button>
+      </div>
+      <div id="rw-pat2" class="copy-output-area" style="border-left:4px solid #178257;"></div>
+      <div style="display:flex;gap:8px;margin-bottom:14px;">
+        <button class="btn btn-copy btn-sm" onclick="copyText('rw-pat2')">📋 パターン2コピー</button>
+      </div>
+      <div id="rw-pat3" class="copy-output-area" style="border-left:4px solid #0f7a50;"></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-copy btn-sm" onclick="copyText('rw-pat3')">📋 パターン3コピー</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 📣 フォロー導線 -->
+<div id="tab-follow" class="tab-content">
+  <div class="tip-box">
+    💡 スキを押してくれた読者をフォロワーに変える「一言」が大事です。記事末尾に添えるだけで効果が出ます。
+  </div>
+  <div class="section-card">
+    <h3>📣 フォロー導線フレーズ生成</h3>
+    <p style="font-size:0.82rem;color:var(--gray);margin-bottom:16px;">記事の最後に入れる「フォロー促進の一言」を3パターン生成します</p>
+    <div class="field-group">
+      <label>あなたのnoteのテーマ・肩書き</label>
+      <input type="text" id="fw-profile" value="中小企業向けAIアプリ開発者・Webマーケター" placeholder="例：中小企業向けAIアプリ開発者">
+    </div>
+    <div class="field-group">
+      <label>今回の記事テーマ</label>
+      <input type="text" id="fw-theme" placeholder="例：AIで業務効率化する方法">
+    </div>
+    <div class="field-group">
+      <label>次回予告・配信頻度（任意）</label>
+      <input type="text" id="fw-next" placeholder="例：毎週月曜更新、次回はAIアプリ活用術">
+    </div>
+    <div class="field-group">
+      <label>フレーズのトーン</label>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;" id="fw-tone-btns">
+        <button class="filter-btn active" onclick="selectFwTone(this,'親近感・ゆるめ')">😊 親近感・ゆるめ</button>
+        <button class="filter-btn" onclick="selectFwTone(this,'丁寧・誠実')">🤝 丁寧・誠実</button>
+        <button class="filter-btn" onclick="selectFwTone(this,'ユーモア・面白め')">😄 ユーモア・面白め</button>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="generateFollow()">✨ フォロー導線を3パターン生成する</button>
+  </div>
+  <div class="loading" id="fw-loading"><div class="spinner"></div><div style="margin-top:8px;font-size:0.88rem;color:var(--navy);font-weight:700;">フォロー導線を生成しています...</div></div>
+  <div id="fw-output" class="output-area">
+    <div class="section-card">
+      <h3>📣 フォロー導線フレーズ（3パターン）</h3>
+      <p style="font-size:0.8rem;color:var(--gray);margin-bottom:14px;">記事の一番最後にそのままコピペしてください😊</p>
+      <div style="background:#e6f7f1;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:0.8rem;color:#0f5c3a;">
+        💡 フォロー率が上がるコツ：フレーズは1つだけ選んで使いましょう。3つ全部入れると逆効果です。
+      </div>
+      <div id="fw-pat1" class="copy-output-area" style="border-left:4px solid #1A9E6A;"></div>
+      <div style="display:flex;gap:8px;margin-bottom:14px;">
+        <button class="btn btn-copy btn-sm" onclick="copyText('fw-pat1')">📋 パターン1コピー</button>
+      </div>
+      <div id="fw-pat2" class="copy-output-area" style="border-left:4px solid #178257;"></div>
+      <div style="display:flex;gap:8px;margin-bottom:14px;">
+        <button class="btn btn-copy btn-sm" onclick="copyText('fw-pat2')">📋 パターン2コピー</button>
+      </div>
+      <div id="fw-pat3" class="copy-output-area" style="border-left:4px solid #0f7a50;"></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-copy btn-sm" onclick="copyText('fw-pat3')">📋 パターン3コピー</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 🔗 連携記事案 -->
+<div id="tab-related" class="tab-content">
+  <div class="tip-box">
+    💡 1記事を読んだ人が「次も読みたい」と思う記事タイトルを3本提案します。回遊率を上げてフォロワーを増やす導線になります。
+  </div>
+  <div class="section-card">
+    <h3>🔗 連携記事タイトル案</h3>
+    <p style="font-size:0.82rem;color:var(--gray);margin-bottom:16px;">今書いた記事をもとに「次に読みたくなる記事」のタイトルを3本提案します</p>
+    <div class="field-group">
+      <label>今書いた記事のタイトル</label>
+      <input type="text" id="rel-title" placeholder="例：【50代経営者必見】AIで3時間の調べ物が30分になった話">
+    </div>
+    <div class="field-group">
+      <label>ターゲット読者</label>
+      <input type="text" id="rel-target" placeholder="例：50代の中小企業経営者">
+    </div>
+    <div class="field-group">
+      <label>記事の概要（どんな内容だったか）</label>
+      <textarea id="rel-summary" style="min-height:100px;" placeholder="例：AIアプリ56本を紹介。業務効率化から生活まで使える内容。税理士・製造業・飲食業にも活用できる。"></textarea>
+    </div>
+    <div class="field-group">
+      <label>連携の方向性</label>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;" id="rel-dir-btns">
+        <button class="filter-btn active" onclick="selectRelDir(this,'続編・深掘り＋別切り口')">📚 続編・深掘り＋別切り口</button>
+        <button class="filter-btn" onclick="selectRelDir(this,'入門・初心者向け')">🌱 入門・初心者向け</button>
+        <button class="filter-btn" onclick="selectRelDir(this,'業種別・ターゲット別')">🏢 業種別・ターゲット別</button>
+        <button class="filter-btn" onclick="selectRelDir(this,'実践・応用編')">🚀 実践・応用編</button>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="generateRelated()">✨ 連携記事タイトルを3本生成する</button>
+  </div>
+  <div class="loading" id="rel-loading"><div class="spinner"></div><div style="margin-top:8px;font-size:0.88rem;color:var(--navy);font-weight:700;">連携記事タイトルを考えています...</div></div>
+  <div id="rel-output" class="output-area">
+    <div class="section-card">
+      <h3>🔗 連携記事タイトル案（3本）</h3>
+      <p style="font-size:0.8rem;color:var(--gray);margin-bottom:14px;">この3本を順番に書いて、元記事の末尾にリンクを貼るだけでOKです😊</p>
+      <div id="rel-result" class="copy-output-area" style="min-height:180px;"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+        <button class="btn btn-copy" onclick="copyText('rel-result')">📋 3本まとめてコピー</button>
+      </div>
+      <div style="background:#e6f7f1;border-radius:8px;padding:12px 16px;margin-top:16px;font-size:0.8rem;color:#0f5c3a;line-height:1.7;">
+        💡 使い方ヒント：元記事の最後に「こちらの記事もおすすめです」という一言と一緒に、連携記事のリンクを貼りましょう。回遊率が上がり、フォロワー増加につながります。
+      </div>
     </div>
   </div>
 </div>
@@ -1340,7 +1493,184 @@ ${urls ? 'URL：' + urls : ''}
   }
 }
 
-function escapeHtml(str) {
+// ✏️ 冒頭リライト
+let selectedRwStyle = '実話・体験談風';
+function selectRwStyle(el, val) {
+  document.querySelectorAll('#rw-style-btns .filter-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  selectedRwStyle = val;
+}
+
+async function generateRewrite() {
+  const target = document.getElementById('rw-target').value;
+  const theme = document.getElementById('rw-theme').value;
+  const text = document.getElementById('rw-text').value;
+  if (!theme || !text) { alert('記事テーマと冒頭文を入力してください'); return; }
+
+  document.getElementById('rw-loading').classList.add('visible');
+  document.getElementById('rw-output').classList.remove('visible');
+
+  const prompt = `あなたはnote記事の冒頭文の専門ライターです。
+
+以下の情報をもとに、記事の冒頭3〜5行を「${selectedRwStyle}」のスタイルで書き直してください。
+ターゲット読者：${target || '中小企業の経営者'}
+記事テーマ：${theme}
+現在の冒頭文：
+${text}
+
+【重要ルール】
+・読者が最初の3行で「これは自分のことだ」「続きが読みたい」と感じる文章にする
+・AIっぽい硬い文体を排除し、人間が語りかけるような自然な文章にする
+・絵文字を1〜2個だけ使う
+・3パターンをそれぞれ150字以内で生成する
+
+以下の形式で厳密に出力してください：
+
+===PAT1===
+（パターン1の冒頭文）
+
+===PAT2===
+（パターン2の冒頭文）
+
+===PAT3===
+（パターン3の冒頭文）`;
+
+  try {
+    const result = await callClaude(prompt, 'claude-sonnet-4-20250514', 1200);
+    const parse = (marker, next) => {
+      const start = result.indexOf(marker);
+      if (start === -1) return '';
+      const after = result.indexOf('\n', start) + 1;
+      const end = next ? result.indexOf(next, after) : result.length;
+      return result.slice(after, end === -1 ? result.length : end).trim();
+    };
+    document.getElementById('rw-pat1').innerText = parse('===PAT1===', '===PAT2===');
+    document.getElementById('rw-pat2').innerText = parse('===PAT2===', '===PAT3===');
+    document.getElementById('rw-pat3').innerText = parse('===PAT3===', null);
+    document.getElementById('rw-loading').classList.remove('visible');
+    document.getElementById('rw-output').classList.add('visible');
+  } catch(e) {
+    document.getElementById('rw-loading').classList.remove('visible');
+    alert('生成中にエラーが発生しました。もう一度お試しください。');
+  }
+}
+
+// 📣 フォロー導線
+let selectedFwTone = '親近感・ゆるめ';
+function selectFwTone(el, val) {
+  document.querySelectorAll('#fw-tone-btns .filter-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  selectedFwTone = val;
+}
+
+async function generateFollow() {
+  const profile = document.getElementById('fw-profile').value;
+  const theme = document.getElementById('fw-theme').value;
+  const next = document.getElementById('fw-next').value;
+  if (!theme) { alert('記事テーマを入力してください'); return; }
+
+  document.getElementById('fw-loading').classList.add('visible');
+  document.getElementById('fw-output').classList.remove('visible');
+
+  const prompt = `あなたはnote記事のフォロワー獲得の専門家です。
+
+以下の情報をもとに、記事末尾に入れる「フォロー促進フレーズ」を3パターン生成してください。
+
+書き手のプロフィール：${profile || 'Webマーケター・AIアプリ開発者'}
+今回の記事テーマ：${theme}
+次回予告・配信頻度：${next || '定期更新中'}
+トーン：${selectedFwTone}
+
+【重要ルール】
+・読者が自然に「フォローしよう」と思える一言にする
+・押しつけがましくならず、読者への感謝や価値提供を軸にする
+・絵文字を1〜2個使う
+・各パターン80字以内
+
+以下の形式で厳密に出力してください：
+
+===FW1===
+（パターン1のフォロー促進フレーズ）
+
+===FW2===
+（パターン2のフォロー促進フレーズ）
+
+===FW3===
+（パターン3のフォロー促進フレーズ）`;
+
+  try {
+    const result = await callClaude(prompt, 'claude-sonnet-4-20250514', 800);
+    const parse = (marker, next) => {
+      const start = result.indexOf(marker);
+      if (start === -1) return '';
+      const after = result.indexOf('\n', start) + 1;
+      const end = next ? result.indexOf(next, after) : result.length;
+      return result.slice(after, end === -1 ? result.length : end).trim();
+    };
+    document.getElementById('fw-pat1').innerText = parse('===FW1===', '===FW2===');
+    document.getElementById('fw-pat2').innerText = parse('===FW2===', '===FW3===');
+    document.getElementById('fw-pat3').innerText = parse('===FW3===', null);
+    document.getElementById('fw-loading').classList.remove('visible');
+    document.getElementById('fw-output').classList.add('visible');
+  } catch(e) {
+    document.getElementById('fw-loading').classList.remove('visible');
+    alert('生成中にエラーが発生しました。もう一度お試しください。');
+  }
+}
+
+// 🔗 連携記事案
+let selectedRelDir = '続編・深掘り＋別切り口';
+function selectRelDir(el, val) {
+  document.querySelectorAll('#rel-dir-btns .filter-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  selectedRelDir = val;
+}
+
+async function generateRelated() {
+  const title = document.getElementById('rel-title').value;
+  const target = document.getElementById('rel-target').value;
+  const summary = document.getElementById('rel-summary').value;
+  if (!title) { alert('記事タイトルを入力してください'); return; }
+
+  document.getElementById('rel-loading').classList.add('visible');
+  document.getElementById('rel-output').classList.remove('visible');
+
+  const prompt = `あなたはnoteのコンテンツ戦略の専門家です。
+
+以下の記事を読んだ読者が「次も読みたい」と思う連携記事タイトルを3本提案してください。
+
+元記事タイトル：${title}
+ターゲット読者：${target || '中小企業の経営者'}
+記事の概要：${summary || ''}
+連携の方向性：${selectedRelDir}
+
+【重要ルール】
+・元記事を読んだ人が自然に「次はこれを読もう」と思えるタイトルにする
+・具体的な数字や体験談を含めると効果的
+・各タイトルは40文字以内
+・3本それぞれ異なる切り口にする
+
+以下の形式で出力してください。タイトルの後ろに「（どんな内容にするとよいか・50字以内）」も一言添えてください：
+
+1. （タイトル）
+→ （内容ヒント）
+
+2. （タイトル）
+→ （内容ヒント）
+
+3. （タイトル）
+→ （内容ヒント）`;
+
+  try {
+    const result = await callClaude(prompt, 'claude-sonnet-4-20250514', 800);
+    document.getElementById('rel-result').innerText = result;
+    document.getElementById('rel-loading').classList.remove('visible');
+    document.getElementById('rel-output').classList.add('visible');
+  } catch(e) {
+    document.getElementById('rel-loading').classList.remove('visible');
+    alert('生成中にエラーが発生しました。もう一度お試しください。');
+  }
+}
   return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 function escapeRegex(str) {
